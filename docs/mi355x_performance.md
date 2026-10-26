@@ -2,6 +2,7 @@
 
 The follow-up implementation roadmap is in the
 [next-version speedup plan](mi355x_next_version_speedup_plan.md).
+Completed stages are recorded in the [next-version results](mi355x_next_version_results.md).
 
 On one MI355X, the README's three-question request improves from **27.01 to
 20.54 ms over HTTP (1.315×)**, with identical answers and usage. Across five fixed

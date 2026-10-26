@@ -1,0 +1,468 @@
+{
+  "gpu": "AMD Instinct MI355X",
+  "torch": "2.14.0+rocm10.1.0",
+  "hip": "7.16.26385",
+  "triton": "3.8.0",
+  "native_fp4": true,
+  "live": 144,
+  "bucket": 192,
+  "source_sha256": "e5c36c3e72f8dbcafaf3a530b1640602aa4f466e46a8de52d5d4751b19283625",
+  "projections": [
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        32,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[52:55], v[80:83], v[0:3], v37, v36 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.05936277906099955,
+      "complete_ms": 0.06299194693565369,
+      "useful_tflops": 385.77548372688386,
+      "min_weight_tb_s": 0.7116084226732884
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        64,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[74:77], v[114:117], v[0:3], v54, v58 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.04189311464627584,
+      "complete_ms": 0.046098550160725914,
+      "useful_tflops": 527.147789144641,
+      "min_weight_tb_s": 0.9723863298023977
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        64,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[102:105], v[198:201], v[0:3], v58, v65 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.034718905886014305,
+      "complete_ms": 0.03884974867105484,
+      "useful_tflops": 625.5059461454218,
+      "min_weight_tb_s": 1.153819562117206
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        64,
+        256,
+        256,
+        8,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[72:75], v[112:115], v[0:3], v52, v53 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.04812397062778473,
+      "complete_ms": 0.052135239044825234,
+      "useful_tflops": 466.1098566960922,
+      "min_weight_tb_s": 0.8597946575340242
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        128,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[132:135], v[156:159], v[0:3], v96, v95 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.03384473919868469,
+      "complete_ms": 0.038048915565013885,
+      "useful_tflops": 638.6712588030925,
+      "min_weight_tb_s": 1.1781045355525797
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "n": 16480,
+      "k": 5120,
+      "config": [
+        32,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 537907200,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[80:83], v[136:139], v[0:3], v49, v47 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.05283439656098684,
+      "complete_ms": 0.05714026093482971,
+      "useful_tflops": 425.2824261288512,
+      "min_weight_tb_s": 0.7844836419477508
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        32,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[52:55], v[80:83], v[0:3], v37, v36 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.03217863314079516,
+      "complete_ms": 0.03702864863655784,
+      "useful_tflops": 244.6672231796084,
+      "min_weight_tb_s": 0.45131757747974643
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        64,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[74:77], v[114:117], v[0:3], v54, v58 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.03469258366209088,
+      "complete_ms": 0.039676998600815284,
+      "useful_tflops": 228.3362391179922,
+      "min_weight_tb_s": 0.42119314941469915
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        64,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[102:105], v[198:201], v[0:3], v58, v65 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.024160563945770264,
+      "complete_ms": 0.029090131774093166,
+      "useful_tflops": 311.43539363641884,
+      "min_weight_tb_s": 0.5744793502407899
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        64,
+        256,
+        256,
+        8,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[72:75], v[112:115], v[0:3], v52, v53 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.054470242875995056,
+      "complete_ms": 0.05943451144478538,
+      "useful_tflops": 152.43158259013288,
+      "min_weight_tb_s": 0.281178049482667
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        128,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[128:131], v[152:155], v[0:3], v93, v92 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.027300272927139744,
+      "complete_ms": 0.03207665501218854,
+      "useful_tflops": 282.43894622296125,
+      "min_weight_tb_s": 0.5209919797949589
+    },
+    {
+      "shape": "gdn_out",
+      "n": 5120,
+      "k": 6144,
+      "config": [
+        32,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 33,
+      "streaming_weight_bytes": 551485440,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[80:83], v[136:139], v[0:3], v49, v47 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.023598889509836834,
+      "complete_ms": 0.028464669531041927,
+      "useful_tflops": 318.278651720162,
+      "min_weight_tb_s": 0.5871025476608891
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        32,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[52:55], v[80:83], v[0:3], v37, v36 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.1061638096968333,
+      "complete_ms": 0.11056047677993774,
+      "useful_tflops": 464.3456907497329,
+      "min_weight_tb_s": 0.8565404451763736
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        64,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[74:77], v[114:117], v[0:3], v54, v58 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.07628199954827626,
+      "complete_ms": 0.08034368852774303,
+      "useful_tflops": 638.9833713232206,
+      "min_weight_tb_s": 1.1786802639425726
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        64,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[102:105], v[198:201], v[0:3], v58, v65 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.06544779241085052,
+      "complete_ms": 0.06943198045094807,
+      "useful_tflops": 739.4039551596716,
+      "min_weight_tb_s": 1.3639178860367205
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        64,
+        256,
+        256,
+        8,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[72:75], v[112:115], v[0:3], v52, v53 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.0797420193751653,
+      "complete_ms": 0.08380120992660522,
+      "useful_tflops": 612.6198059068968,
+      "min_weight_tb_s": 1.1300495551668017
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        128,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[128:131], v[152:155], v[0:3], v93, v92 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.05568025012811025,
+      "complete_ms": 0.05886358519395193,
+      "useful_tflops": 872.1568825759337,
+      "min_weight_tb_s": 1.6087963328766137
+    },
+    {
+      "shape": "mlp_gate_up",
+      "n": 34816,
+      "k": 5120,
+      "config": [
+        32,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 6,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[80:83], v[136:139], v[0:3], v49, v47 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.0951012670993805,
+      "complete_ms": 0.09940376877784729,
+      "useful_tflops": 516.4621179980958,
+      "min_weight_tb_s": 0.9526753478697514
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        32,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[52:55], v[80:83], v[0:3], v37, v36 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.08139826854070027,
+      "complete_ms": 0.09038498004277547,
+      "useful_tflops": 283.99785526148105,
+      "min_weight_tb_s": 0.5238675715543812
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        64,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[74:77], v[114:117], v[0:3], v54, v58 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.08918289343516032,
+      "complete_ms": 0.09830835461616516,
+      "useful_tflops": 261.1084335631749,
+      "min_weight_tb_s": 0.48164533100846063
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        64,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[102:105], v[198:201], v[0:3], v58, v65 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.06241944928963979,
+      "complete_ms": 0.07143197953701019,
+      "useful_tflops": 359.35082082809083,
+      "min_weight_tb_s": 0.6628650123782057
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        64,
+        256,
+        256,
+        8,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[72:75], v[112:115], v[0:3], v52, v53 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.14580189188321432,
+      "complete_ms": 0.15491236249605814,
+      "useful_tflops": 165.70104584553846,
+      "min_weight_tb_s": 0.3056551409911191
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        128,
+        128,
+        256,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[128:131], v[152:155], v[0:3], v93, v92 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.06694238384564717,
+      "complete_ms": 0.0761015812555949,
+      "useful_tflops": 337.30101341505093,
+      "min_weight_tb_s": 0.6221915395025895
+    },
+    {
+      "shape": "mlp_down",
+      "n": 5120,
+      "k": 17408,
+      "config": [
+        32,
+        128,
+        512,
+        4,
+        2
+      ],
+      "copies": 12,
+      "streaming_weight_bytes": 568197120,
+      "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[0:3], v[80:83], v[136:139], v[0:3], v49, v47 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+      "gemm_ms": 0.06154068807760874,
+      "complete_ms": 0.0704686443010966,
+      "useful_tflops": 364.2632937611452,
+      "min_weight_tb_s": 0.6719266486479457
+    }
+  ]
+}
