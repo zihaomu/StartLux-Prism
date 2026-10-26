@@ -116,4 +116,4 @@ call and its corrected grouped rerun are retained in the workspace execution log
 Several speed goals remain unmet; passing the local numerical set does not
 establish general model quality or production support. See the
 [profile-specific report](amd_w4a16.md) and
-[round-level evidence](../bench/results/r9700_w4a16_20261026.json).
+[round-level evidence](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/r9700_w4a16_20261026.json).

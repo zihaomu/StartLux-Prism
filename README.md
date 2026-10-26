@@ -57,6 +57,9 @@ cache, images, AutoThink, Instant, data parallelism and INT8 tensor parallelism.
 See [MI355X setup and the measured validation scope](docs/mi355x.md).
 The [27B INT8 performance report](docs/mi355x_performance.md) records measured
 bandwidth, compute throughput and decision latency before and after MI355X tile selection.
+An opt-in [native MXFP4 profile](docs/mi355x.md#experimental-native-mxfp4) converts
+original 27B BF16 weights and improves measured HTTP latency by 1.42–1.68× over
+the earlier tuned INT8 profile. See the [results and remaining quality gates](docs/mi355x_next_version_results.md).
 
 A single-GPU ROCm W4A8 backend for R9700 (`gfx1201`) is available experimentally.
 An explicit compressed [W4A16 profile](docs/amd_w4a16.md) passes the local FP32

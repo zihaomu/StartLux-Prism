@@ -180,7 +180,7 @@ four-seed teacher-forcing and reverse-batch protocol; add `--graphs` for that mo
 `scripts/amd/test_readout_isolation.py --precision w4a16` additionally checks
 eight individual questions against mixed/reordered batches, sharing and graphs.
 
-The [compact evidence](../bench/results/r9700_w4a16_20261026.json) preserves
+The [compact evidence](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/r9700_w4a16_20261026.json) preserves
 round-level measurements, original slow samples, selection decisions, shape
 samples, source/runtime identities and every target assessment. The two existing
 bugfix dependencies remain separate: #17 and #18 must be applied to this backend

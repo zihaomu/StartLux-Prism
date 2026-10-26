@@ -150,4 +150,4 @@ requests can benefit from the prefix cache. Both owned test containers stopped;
 their runtime/server log fault scans were empty.
 
 Round-level measurements, runtime/source identities and unmet engineering gates
-are retained in [the compact evidence](../bench/results/r9700_20261025.json).
+are retained in [the compact evidence](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/r9700_20261025.json).

@@ -14,7 +14,10 @@ from run_http import Client
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--workspace', required=True)
+    p.add_argument('--model-dir', required=True, help='original BF16 model directory, also containing the INT8 GGUF')
+    p.add_argument('--gguf', required=True, help='Q8_0 GGUF basename inside --model-dir')
+    p.add_argument('--calib', required=True, help='INT8 calibration file; may be outside the checkout')
+    p.add_argument('--mxfp4-artifact', help='converted FP4 directory; required for the mxfp4-r32 profile')
     p.add_argument('--manifest', required=True)
     p.add_argument('--image', default='startlux-prism:mi355x-next')
     p.add_argument('--out', required=True)
@@ -24,15 +27,26 @@ def main():
     p.add_argument('--profiles', default='int8-stock,int8-next,mxfp4-r32')
     p.add_argument('--check-concurrency', action='store_true')
     a = p.parse_args()
-    workspace, output = Path(a.workspace).resolve(), Path(a.out).resolve()
+    profiles = a.profiles.split(',')
+    if any(profile not in ('int8-stock', 'int8-next', 'mxfp4-r32') for profile in profiles):
+        p.error('--profiles must contain int8-stock, int8-next or mxfp4-r32')
+    if 'mxfp4-r32' in profiles and not a.mxfp4_artifact:
+        p.error('--mxfp4-artifact is required for the mxfp4-r32 profile')
+    model, calib = Path(a.model_dir).resolve(), Path(a.calib).resolve()
+    artifact = Path(a.mxfp4_artifact).resolve() if a.mxfp4_artifact else None
+    if Path(a.gguf).name != a.gguf or not (model / a.gguf).is_file():
+        p.error('--gguf must name an existing file inside --model-dir')
+    if not calib.is_file():
+        p.error('--calib must name an existing file')
+    if 'mxfp4-r32' in profiles and not artifact.is_dir():
+        p.error('--mxfp4-artifact must name an existing directory')
+    output = Path(a.out).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     bodies = json.loads(Path(a.manifest).read_text())['requests']
-    folder = '/workspace/models/StartLux-Decision-v1.1-27B-AutoThink'
-    gguf = folder + '/StartLux-Decision-v1.1-27B-AutoThink-Q8_0.gguf'
-    artifact = '/workspace/models/StartLux-Decision-v1.1-27B-AutoThink-MXFP4-R32'
-    calib = '/workspace/StartLux-Prism-mi355x/results/mi355x-27b-calib.pt'
-    report = dict(image=a.image, rounds=a.rounds, measurements=[], health={}, responses={})
-    profiles = a.profiles.split(',')
+    folder, gguf = '/models', '/models/' + a.gguf
+    report = dict(image=a.image, rounds=a.rounds, measurements=[], health={}, responses={},
+                  inputs=dict(model_dir=str(model), gguf=a.gguf, calib=str(calib),
+                              mxfp4_artifact=str(artifact) if artifact else None))
     for round_no in range(a.rounds):
         order = profiles if round_no % 2 == 0 else list(reversed(profiles))
         for profile in order:
@@ -41,18 +55,21 @@ def main():
             command = ['docker', 'run', '--rm', '--name', name, '--network', 'host', '--ipc=host',
                        '--device=/dev/kfd', '--device=/dev/dri', '--group-add', 'video',
                        '--security-opt', 'seccomp=unconfined', '-e', 'HIP_VISIBLE_DEVICES=' + os.getenv('HIP_VISIBLE_DEVICES', '0'),
-                       '-e', 'OMP_NUM_THREADS=8', '-v', str(workspace) + ':/workspace:ro',
+                       '-e', 'OMP_NUM_THREADS=8', '-v', str(model) + ':/models:ro',
+                       '-v', str(calib) + ':/calib.pt:ro',
                        '-v', 'startlux-prism-mi355x-next-triton:/root/.triton']
+            if fp4:
+                command += ['-v', str(artifact) + ':/mxfp4:ro']
             if profile == 'int8-stock':
                 for key, value in dict(INTRA_WARPS=8, HREC_BV=16, OUT_BV=32, HREC_NS=1, OUT_NS=1).items():
                     command += ['-e', f'STARTLUX_PRISM_{key}={value}']
             command += [a.image, '--gguf', folder if fp4 else gguf, '--model-dir', folder,
-                        '--precision', 'mxfp4' if fp4 else 'int8', '--calib', calib,
+                        '--precision', 'mxfp4' if fp4 else 'int8', '--calib', '/calib.pt',
                         '--port', str(a.port), '--max-tokens', '4096', '--graphs', '--graph-max-tokens', '1536',
                         '--prefix-cache', '0', '--mmproj', 'none', '--think-mode', 'never',
                         '--max-think-budget', '64', '--think-seqs', '1', '--think-kv-rows', '4096']
             if fp4:
-                command += ['--mxfp4-artifact', artifact]
+                command += ['--mxfp4-artifact', '/mxfp4']
             log_path = output.with_name(f'http-{round_no}-{profile}.log')
             with log_path.open('w') as log:
                 process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)

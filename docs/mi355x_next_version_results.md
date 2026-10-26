@@ -12,7 +12,8 @@ latency/quality are reported separately.
 The tuned INT8 implementation is `4534c11`; the approved work plan is `afeab60`.
 Its recorded `readme3` HTTP p50 is 20.54 ms. See the
 [INT8 performance report](mi355x_performance.md) for all five suites and raw data.
-The next-version target is 12 ms; no FP4 model-level gain has been established.
+At the start of this iteration, the target was 12 ms and no FP4 model-level gain
+had been established. The completed measurements appear below.
 The [frozen manifest](../bench/results/mi355x_fp4_frozen_20261026.json) records
 the Q8 file/calibration/tokenizer hashes, seven exact HTTP request bodies and
 the original BF16 revision and shard hashes.
@@ -55,7 +56,7 @@ These are synthetic projection measurements, not whole-model speedups.
 | GDN input | 33.84 µs | 38.05 µs | 639 |
 | GDN output | 23.60 µs | 28.46 µs | 318 |
 
-The [initial sweep data](../bench/results/mi355x_fp4_initial_20261026.json) records
+The [initial sweep data](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_fp4_initial_20261026.json) records
 all six configurations. Timings are the lowest of five warmed graph timings,
 used for candidate selection rather than release p50 estimates. Initial kernels use
 ordinary row-major payloads/scales. MLP down has a long K and warrants further
@@ -92,7 +93,7 @@ pass that exactness check. The all-FP4 candidate's largest probability change
 against BF16 is about 0.1604 on this small suite. Ten decisions cannot establish
 task accuracy parity or qualify a default precision change.
 
-Data: [initial model ablation](../bench/results/mi355x_fp4_model_initial_20261026.json). Engine time must not be compared
+Data: [initial model ablation](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_fp4_model_initial_20261026.json). Engine time must not be compared
 directly with the historical HTTP p50. Next: select and validate shape-specific
 FP4 kernels, repeat matched end-to-end timing, and evaluate decision quality on
 a larger labeled suite. Current INT8 remains the default validated profile.
@@ -232,7 +233,7 @@ The shape-specific FP4 table was requalified after adding the scale layout and
 workgroup ordering. A second matched rotation-enabled sweep improves selected
 384-row shapes. Very wide M tiles and a shared-weight 128+tail prototype did
 not improve the primary projection and were rejected. The tail prototype is
-retained under `bench/mi355x_mxfp4_tail_probe.py`, outside the runtime.
+retained as an [archived research script](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/mi355x_mxfp4_tail_probe.py), outside the runtime and current source tree.
 
 The native precision remains experimental. The primary 12 ms HTTP target and
 broader independent quality qualification are still open; no theoretical peak
@@ -287,25 +288,31 @@ The 23 ms `startlux3` and 65 ms `longpage2` targets are met. The 10 ms `yesno`,
 screen matches BF16's total and tier scores, but six of 231 public argmax
 decisions differ, and broader independent quality qualification is unfinished.
 
-Raw evidence:
+The [compact summary](../bench/results/mi355x_next_summary_20261026.json) remains
+in the source tree. The [evidence index](../bench/results/README.md) describes the
+workspace archive; raw links below point to the immutable published snapshot:
 
-- [HTTP samples, p50/p95 and responses](../bench/results/mi355x_next_http_20261026.json).
-- [Paired exact INT8 GDN samples](../bench/results/mi355x_gdn_int8_ab_20261026.json).
-- [Original BF16 and rotated FP4 public predictions](../bench/results/mi355x_fp4_quality_r32_20261026.json).
-- [10,000-request graph/cache/isolation validation](../bench/results/mi355x_fp4_validation_20261026.json).
-- [Next-INT8 concurrent API check](../bench/results/mi355x_next_concurrency_int8-next_20261026.json)
-  and [FP4 concurrent API check](../bench/results/mi355x_next_concurrency_mxfp4-r32_20261026.json).
-- [Versioned FP4 artifact manifest](../bench/results/mi355x_fp4_artifact_manifest_20261026.json),
+- [HTTP samples, p50/p95 and responses](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_next_http_20261026.json).
+- [Paired exact INT8 GDN samples](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_gdn_int8_ab_20261026.json).
+- [Original BF16 and rotated FP4 public predictions](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_fp4_quality_r32_20261026.json).
+- [10,000-request graph/cache/isolation validation](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_fp4_validation_20261026.json).
+- [Next-INT8 concurrent API check](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_next_concurrency_int8-next_20261026.json)
+  and [FP4 concurrent API check](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_next_concurrency_mxfp4-r32_20261026.json).
+- [Versioned FP4 artifact manifest](https://github.com/zihaomu/StartLux-Prism/blob/32c77d63aa3d485f9d145251407fb6a0796a74d8/bench/results/mi355x_fp4_artifact_manifest_20261026.json),
   including full source-shard hashes. Runtime checks cover source weights as
   well as the FP4 payload files; this adds startup work, outside warmed latency.
 
 Reproduce the HTTP comparison after building `startlux-prism:mi355x-next`:
 
 ```bash
+ARTIFACTS=../artifacts/startlux-prism/2026-10-26
+M=../models/StartLux-Decision-v1.1-27B-AutoThink
 HIP_VISIBLE_DEVICES=0 python3 bench/mi355x_next_http.py \
-  --workspace /dev/shm/zihao_workspace/starlux_workspace \
+  --model-dir "$M" --gguf StartLux-Decision-v1.1-27B-AutoThink-Q8_0.gguf \
+  --calib "$ARTIFACTS/results/mi355x-27b-calib.pt" \
+  --mxfp4-artifact ../models/StartLux-Decision-v1.1-27B-AutoThink-MXFP4-R32 \
   --manifest bench/results/mi355x_fp4_frozen_20261026.json \
-  --rounds 3 --reps 100 --out results/mi355x-next-http.json
+  --rounds 3 --reps 100 --out "$ARTIFACTS/results/mi355x-next-http.json"
 ```
 
 The remaining speed work should start with a fresh profile of the selected
@@ -314,3 +321,25 @@ producer/quantization fusion using the actual HTTP live counts. Retain the
 failed tile/tail experiments as evidence; larger tiles alone did not solve
 the primary workload. Do not enable FP4 by default until the remaining gates
 are satisfied.
+
+## Part 12: PR packaging and workspace cleanup
+
+**Completed:** moved 18 raw captures and five rejected research scripts out of
+the source tree, together with local logs, traces, calibration files and caches.
+The workspace archive is `../artifacts/startlux-prism/2026-10-26/`; its manifest
+records paths, sizes and SHA256 hashes for 351 relocated files. The 23 formerly
+tracked files match the published source snapshot byte for byte. Compact
+summaries, the frozen workload, runtime tables and supported benchmark tools
+remain in the repository. See the [evidence index](../bench/results/README.md).
+
+The HTTP comparison now accepts explicit model, calibration and FP4 artifact
+paths and mounts those inputs individually. A simulated two-round run checked
+six server launches and 30 measurement groups, including paths with spaces,
+alternating precision order, stable responses and invalid-input rejection.
+Seventeen artifact-integrity/backend/dispatch regression tests pass on the
+matched image without GPU access. Local documentation targets and archive
+checksums also pass.
+
+Runtime, kernel, test and serving-script sources match the measured snapshot;
+the performance and quality results above are retained from that qualification.
+This packaging step does not add a new GPU latency measurement.

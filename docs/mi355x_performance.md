@@ -115,18 +115,19 @@ From a matched ROCm environment with the checkout mounted:
 
 ```bash
 # Set G, M and CALIB to the same checkpoint, folder and calibration in this environment.
+RUNS=../artifacts/startlux-prism/2026-10-26/results/mi355x-perf
 python3 bench/mi355x_latency_ab.py --gguf "$G" --model-dir "$M" --calib "$CALIB" \
-  --reps 30 --rounds 3 --out results/mi355x-perf/latency-ab.json
+  --reps 30 --rounds 3 --out "$RUNS/latency-ab.json"
 STARTLUX_PRISM_MI355X_GEMM=baseline python3 bench/mi355x_roofline.py \
-  --check --out results/mi355x-perf/roofline-baseline.json
+  --check --out "$RUNS/roofline-baseline.json"
 python3 bench/profile.py --gguf "$G" --model-dir "$M" --precision int8 --calib "$CALIB" \
   --request readme3 --max-tokens 4096 --gemm-detail \
-  --out results/mi355x-perf/tuned-readme3.json --trace results/mi355x-perf/tuned-readme3-trace.json
+  --out "$RUNS/tuned-readme3.json" --trace "$RUNS/tuned-readme3-trace.json"
 
 # One cold-weight projection, collecting one hardware metric per application pass:
 rocprofv3 --pmc FetchSize --pmc WRITE_SIZE --pmc MfmaUtil --pmc VALUBusy \
   --kernel-include-regex _w8a8_kernel --kernel-iteration-range 4 --output-format csv \
-  --output-directory results/mi355x-perf/counters-baseline \
+  --output-directory "$RUNS/counters-baseline" \
   -- python3 bench/mi355x_counter_gemm.py --mode baseline
 ```
 
@@ -137,7 +138,9 @@ the previous rule. Existing graphs retain their captured choices.
 
 The compact measurements are tracked in
 [`bench/results/mi355x_int8_20261026.json`](../bench/results/mi355x_int8_20261026.json).
-Full samples, Chrome traces, counter CSVs and logs are retained locally under
-`results/mi355x-perf`. This work measures single-GPU decision latency; it does
+Full samples, Chrome traces, counter CSVs and logs are archived locally under
+`../artifacts/startlux-prism/2026-10-26/results/mi355x-perf`; see the
+[evidence index](../bench/results/README.md). Pass an external output path for
+new runs. This work measures single-GPU decision latency; it does
 not establish AutoThink decode, multi-client throughput, tensor-parallel or
 W4A8/W4A16 speedups.
