@@ -1,5 +1,6 @@
 """Where a forward pass spends GPU time: per-kernel totals for one request (eager, after warm-up), and the replayed
 graph time for the same request.
+Cross-request prefix caching is disabled for these measurements.
 
     python bench/profile.py --gguf X.gguf --model-dir DIR [--precision bf16|int8] [--request startlux3|hard|...]
     python bench/profile.py ... --batch 32 [--mix startlux3,startlux1,readme3,yesno,review1]
@@ -9,7 +10,9 @@ shape of a batch under load.
 """
 import argparse
 import collections
+import json
 import os
+from pathlib import Path
 import sys
 import time
 
@@ -46,9 +49,13 @@ def main():
     ap.add_argument("--batch", type=int, default=0)
     ap.add_argument("--mix", default="startlux3,startlux1,readme3,yesno,review1")
     ap.add_argument("--max-tokens", type=int, default=8192)
+    ap.add_argument("--reps", type=int, default=20)
+    ap.add_argument("--out", help="JSON measurements")
+    ap.add_argument("--trace", help="Chrome trace of the eager forward")
     ap.add_argument("--gemm-detail", action="store_true", help="time every projection GEMM (eager, CUDA events)")
     a = ap.parse_args()
-    eng = Engine(a.gguf, a.model_dir, Options(precision=a.precision, max_tokens=a.max_tokens, calib=a.calib))
+    eng = Engine(a.gguf, a.model_dir, Options(precision=a.precision, max_tokens=a.max_tokens, calib=a.calib,
+                                            prefix_cache=0))
 
     def group(state, questions):
         recs = [J.from_systemone(state, q) for q in questions.values()]
@@ -65,7 +72,7 @@ def main():
     for _ in range(3):
         eng.run(groups)
     torch.cuda.synchronize()
-    reps = 20
+    reps = a.reps
     t0 = time.perf_counter()
     for _ in range(reps):
         eng.run(groups)
@@ -84,7 +91,8 @@ def main():
     # eager kernel breakdown
     eng.opt.graphs = False
     eng.run(groups)
-    with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CUDA]) as prof:
+    with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU,
+                                           torch.profiler.ProfilerActivity.CUDA]) as prof:
         eng.run(groups)
         torch.cuda.synchronize()
     tot = collections.Counter()
@@ -98,14 +106,24 @@ def main():
     print(f"eager kernel time {all_us / 1000:.2f} ms in {sum(cnt.values())} kernels")
     for name, us in tot.most_common(a.top):
         print(f"  {us / 1000:8.3f} ms {100 * us / all_us:5.1f}%  x{cnt[name]:4d}  {name}")
+    report = dict(request=a.request, precision=a.precision, prompt_tokens=prompt_tokens,
+                  gpu=torch.cuda.get_device_name(), torch=str(torch.__version__), hip=torch.version.hip,
+                  prefix_cache=False,
+                  computed_tokens=plan.n_tok, bucket=T, reads=plan.counts['read'], run_ms=wall,
+                  graph_ms=ev[0].elapsed_time(ev[1]), eager_kernel_ms=all_us / 1000,
+                  kernels=[dict(name=name, ms=us / 1000, calls=cnt[name], percent=100 * us / all_us)
+                           for name, us in tot.most_common()])
+    if a.trace:
+        Path(a.trace).parent.mkdir(parents=True, exist_ok=True)
+        prof.export_chrome_trace(a.trace)
     if a.gemm_detail:
         from startlux_prism.kernels import w8a8 as KW
         inner, calls = KW.gemm, []
 
-        def timed_gemm(a_, a_s, w, w_s, out, n_rows, gk, epi=0, outs=None, cfg=None, slots=None):
+        def timed_gemm(a_, a_s, w, w_s, out, n_rows, gk, epi=0, outs=None, cfg=None, slots=None, **kwargs):
             e0, e1 = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             e0.record()
-            r = inner(a_, a_s, w, w_s, out, n_rows, gk, epi=epi, outs=outs, cfg=cfg, slots=slots)
+            r = inner(a_, a_s, w, w_s, out, n_rows, gk, epi=epi, outs=outs, cfg=cfg, slots=slots, **kwargs)
             e1.record()
             calls.append(((w.shape[0], w.shape[1], a_.shape[0], epi, str(KW._choice(w.shape[0], w.shape[1],
                                                                                    a_.shape[0]))), e0, e1))
@@ -124,7 +142,13 @@ def main():
         for key, v in sorted(agg.items(), key=lambda kv: -sum(kv[1])):
             print(f"  {str(key):60s} {len(v):3d} x {sum(v) / len(v):7.1f} us = {sum(v) / 1000:6.3f} ms")
         print(f"  total {sum(sum(v) for v in agg.values()) / 1000:.3f} ms")
+        report['gemms'] = [dict(n=key[0], k=key[1], m=key[2], epi=key[3], count=len(v),
+                                mean_us=sum(v) / len(v), total_ms=sum(v) / 1000)
+                           for key, v in sorted(agg.items(), key=lambda kv: -sum(kv[1]))]
         EM.KW.gemm = inner
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.out).write_text(json.dumps(report, indent=2) + '\n')
 
 
 if __name__ == "__main__":

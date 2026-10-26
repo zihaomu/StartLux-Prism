@@ -58,7 +58,7 @@ def test_tp_launch_records_both_timing_events():
     assert events == ["publish", "start", "pass", "end", "done"]
 
 
-@pytest.mark.parametrize("m,live,k", [(1, 1, 256), (7, 5, 512), (65, 63, 2048)])
+@pytest.mark.parametrize("m,live,k", [(1, 1, 256), (7, 5, 512), (65, 63, 2048), (192, 143, 2048)])
 def test_cdna4_w8a8_exact_and_graph(m, live, k):
     if not B.is_hip() or not torch.cuda.is_available() or B.architecture() != "gfx950":
         pytest.skip("requires an MI350/MI355 (gfx950)")

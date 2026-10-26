@@ -17,6 +17,7 @@ CUDA kernel's epilogue and the deferred split-K fold (quant.norm_q8) compute it.
 kernel, tile shape and split gives an element the same bits, and a request's numbers do not depend on its batch.
 """
 import functools
+import hashlib
 import json
 import math
 import os
@@ -71,7 +72,7 @@ def _w8a8_kernel(a_ptr, as_ptr, w_ptr, ws_ptr, out_ptr, outs_ptr, n_rows_ptr, M,
             acci = tl.dot(a, w, acci)
             a_p += BK
             w_p += BK
-        sa = tl.load(as_ptr + rm * G + g)
+        sa = tl.load(as_ptr + rm * G + g, mask=rm < M, other=0.0)
         sw = tl.load(ws_ptr + rn * G + g, mask=nm, other=0.0)
         acc += libdevice.mul_rn(libdevice.mul_rn(acci.to(tl.float32), sa[:, None]), sw[None, :])
     rmask = rm < live
@@ -119,12 +120,36 @@ def _quant_rows_kernel(x_ptr, q_ptr, s_ptr, n_rows_ptr, K: tl.constexpr, GK: tl.
 NONDETERMINISTIC = os.environ.get("STARTLUX_PRISM_NONDETERMINISTIC") == "1"
 
 
+@functools.lru_cache(None)
+def _mi355x_table():
+    """Only offline measured shapes on the exact qualified MI355X runtime."""
+    from ..backends import architecture
+    if torch.version.hip is None or architecture() != "gfx950":
+        return {}
+    path = os.path.join(os.path.dirname(__file__), "w8a8_table_gfx950.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path) as file:
+        data = json.load(file)
+    runtime = dict(torch=str(torch.__version__), triton=triton.__version__, hip=torch.version.hip)
+    identity = hashlib.sha256(_w8a8_kernel.src.encode()).hexdigest()
+    if (data.get("schema") != 1 or data.get("architecture") != "gfx950" or data.get("runtime") != runtime
+            or data.get("gpu") != torch.cuda.get_device_name()
+            or data.get("kernel_identity") != identity):
+        return {}
+    return data["entries"]
+
+
 def pick(M, N, K, epi=0):
     """(BM, BN, BK, GROUP_M, warps, stages, split_k), from cold-L2 searches on the RTX 5090 (bench/w8a8_micro.py
     --configs --cold): weights stream from DRAM as in a forward pass.  Eight warps throughout (four with 128-wide K
     tiles spill).  Up to a few hundred tokens a projection is bound by the weight stream, which needs programs on all
     170 SMs; the 2560-wide output projections, whose epilogue adds into the fp32 residual stream, split K with atomic
     adds for that when NONDETERMINISTIC."""
+    if torch.version.hip is not None and os.environ.get("STARTLUX_PRISM_MI355X_GEMM") != "baseline":
+        choice = _mi355x_table().get(f"{M},{N},{K},{epi}")
+        if choice is not None:
+            return tuple(choice)
     if N >= 8192:                                                    # qkv|z|b|a, q|k|v, gate|up
         if M <= 64:
             return (64, 64, 128, 8, 8, 3, 1)

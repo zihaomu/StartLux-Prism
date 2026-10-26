@@ -55,6 +55,8 @@ HTTP time, median of 5 runs, model loading excluded.
 MI355X (`gfx950`) runs BF16, INT8, W4A8 and explicit W4A16, with graphs, FP8 KV
 cache, images, AutoThink, Instant, data parallelism and INT8 tensor parallelism.
 See [MI355X setup and the measured validation scope](docs/mi355x.md).
+The [27B INT8 performance report](docs/mi355x_performance.md) records measured
+bandwidth, compute throughput and decision latency before and after MI355X tile selection.
 
 A single-GPU ROCm W4A8 backend for R9700 (`gfx1201`) is available experimentally.
 An explicit compressed [W4A16 profile](docs/amd_w4a16.md) passes the local FP32
