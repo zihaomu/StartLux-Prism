@@ -1,35 +1,64 @@
-# MI355X next-version speedup plan
+# MI355X next-version speedup plan: native MXFP4 first
 
 Status: proposed. Date: 2026-10-26.
 
-The next version should deliver a substantial reduction in **single-GPU 27B
-INT8 decision latency**. The primary release target is **12 ms HTTP p50 for
-`readme3`**, compared with the current 20.54 ms. A 9 ms result is a stretch goal.
-These are engineering targets, not measured results or promised gains.
+The next version should prioritize **native MXFP4 on MI355X** to reduce
+single-GPU 27B decision latency. The primary release target is **12 ms HTTP p50
+for `readme3`**, compared with the current INT8 result of 20.54 ms. A 9 ms result
+is a stretch goal. These are engineering targets, not measured FP4 results or
+promised gains. No native MXFP4 runtime has been implemented or measured here.
+
+The plan has two tracks:
+
+- **Primary: native MXFP4 weights and activations**, with a separately qualified
+  accuracy contract and selective higher precision for sensitive operations.
+- **Reference and fallback: exact INT8**, retaining the current numerical
+  contract and the kernel improvements below. Shared GDN and request-overhead
+  improvements can benefit both tracks.
 
 The comparison baseline is commit **`4534c11`**, including its 67 qualified
 MI355X tiles. The earlier untuned port is useful historical context; release
 claims must compare against the current version.
 
-## 1. Workload and numerical contract
+## 1. Workload and precision contracts
 
-Keep the following fixed for the primary comparison:
+Keep the following fixed across the main comparisons:
 
 - One AMD Instinct MI355X (`gfx950`), one model replica, one HTTP client.
-- `StartLux-Decision-v1.1-27B-AutoThink-Q8_0.gguf`, the matching tokenizer and
-  configuration, and the existing SmoothQuant calibration.
-- The INT8/W8A8 path, thinking disabled, text input, GPU graphs enabled.
+- The same StartLux-Decision-v1.1-27B-AutoThink model revision, matching tokenizer
+  and configuration, thinking disabled, text input and GPU graphs enabled.
 - Cross-request prefix caching disabled; retain Prism's normal constant system
   prefix. Keep within-request evidence sharing and API decision settings fixed.
 - Python 3.12, PyTorch `2.14.0+rocm10.1.0`, HIP `7.16.26385`, Triton `3.8.0`.
   Qualify a different stack as a separate experiment.
-- Exact INT32 projection sums, the existing ordered FP32 scale/residual
-  operations, and unchanged activation quantization and BF16 conversion points.
 
-The candidate must reproduce the current version's logits, answers, usage,
-cache behavior and seeded generation where those paths are affected.
-Precision changes belong to separately evaluated profiles. They do not satisfy
-this version's exact INT8 performance target.
+### Native MXFP4 track
+
+Use packed FP4 E2M1 values with one E8M0 scale per 32 K-dimension values, for both
+weights and dynamically quantized activations in selected projections. Execute
+the product through `gfx950` scaled MFMA instructions. Prefer conversion from
+the original BF16 model weights; identify and obtain that exact source revision
+before conversion. Converting the existing Q8 or Q4 artifact adds quantization
+error and must be labeled as a separate ablation, not as the original-weight
+recipe. The existing INT8 SmoothQuant calibration cannot be assumed suitable.
+
+Initially keep norms, softmax, GDN recurrent state and decision readout at their
+validated BF16/FP32 precision. Quantize large MLP projections first, then extend
+coverage only after per-layer and model-level sensitivity checks. Report the
+actual layer coverage; a hybrid model is not an all-FP4 model.
+
+FP4 changes the represented model and activations. Its logits need not equal
+INT8 bit for bit. It must pass the independent kernel and decision-quality
+gates in section 5, while preserving API semantics, usage, state isolation and
+supported cache behavior. INT8 remains available when FP4 fails these gates.
+
+### Exact INT8 track
+
+Keep `StartLux-Decision-v1.1-27B-AutoThink-Q8_0.gguf` and the existing SmoothQuant
+calibration fixed. Preserve exact INT32 projection sums, ordered FP32
+scale/residual operations, activation quantization and BF16 conversion points.
+This track must reproduce current logits, answers and affected seeded-generation
+results exactly. Report its speedups separately from the FP4 track.
 
 ## 2. Measured baseline and release targets
 
@@ -37,7 +66,7 @@ The baseline measurements are in
 [`mi355x_performance.md`](mi355x_performance.md) and
 [`bench/results/mi355x_int8_20261026.json`](../bench/results/mi355x_int8_20261026.json).
 
-| HTTP workload | Current p50 | Next-version target | Required speedup |
+| HTTP workload | Current INT8 p50 | Next-version target | Required speedup |
 |---|---:|---:|---:|
 | `yesno` | 15.96 ms | ≤10 ms | 1.60× |
 | `review1` | 18.33 ms | ≤11 ms | 1.67× |
@@ -45,9 +74,12 @@ The baseline measurements are in
 | `startlux3` | 34.62 ms | ≤23 ms | 1.51× |
 | `longpage2` | 96.03 ms | ≤65 ms | 1.48× |
 
-Every row is a release target. Record an unmet target as open; keep any partial
-improvement explicitly scoped. Also require no >3% p50 or p95 regression in the
-expanded request suite after accounting for run-to-run variation.
+Every row is a release target for the qualified next-version precision profile;
+native MXFP4 is the primary candidate. Name the precision and coverage beside
+every result. Record an unmet target as open; keep any partial improvement
+explicitly scoped. Also require no >3% p50 or p95 regression in the expanded
+request suite after accounting for run-to-run variation. FP4 must additionally
+pass its quality gates; latency alone cannot qualify that profile.
 
 The current `readme3` eager profile supplies the priority order:
 
@@ -57,8 +89,10 @@ The current `readme3` eager profile supplies the priority order:
 | GDN intra, recurrence, output, convolution prep and gated norm | 3.74 ms | 18.5% |
 | Other kernels | 1.78 ms | 8.8% |
 
-A working allocation for the 12 ms target is approximately 7.0 ms for GEMMs,
-2.6 ms for GDN, 1.8 ms for other GPU work and 0.6 ms for remaining request cost.
+A working allocation for the 12 ms target is approximately 7.0 ms for complete
+projection paths, 2.6 ms for GDN, 1.8 ms for other GPU work and 0.6 ms for remaining
+request cost. Include FP4 activation quantization and scale/packing work in the
+projection allocation, without counting it again under other kernels.
 This allocation guides experiments. Eager profiler sums and HTTP wall time are
 different measurements; the release gate uses actual HTTP latency.
 
@@ -68,6 +102,38 @@ outside GEMM or a larger GEMM reduction. Candidate speedups cannot be multiplied
 together when they optimize overlapping work.
 
 ## 3. Interpret the computation and bandwidth numbers correctly
+
+### Native FP4 opportunity and limits
+
+AMD specifies **10.0663 PFLOPS dense MXFP4**, versus **5.0332 POPS dense INT8**
+and **2.5166 PFLOPS BF16** for MI355X. The theoretical arithmetic-rate ratios are
+approximately 2× versus INT8 and 4× versus BF16. The native FP4 route therefore
+deserves priority, but these ratios do not predict whole-request speedups.
+See the [AMD MI355X datasheet](https://www.amd.com/content/dam/amd/en/documents/instinct-tech-docs/product-briefs/amd-instinct-mi355x-gpu-brochure.pdf).
+
+For MXFP4, a 32-value block needs 16 bytes of payload and one byte of scale:
+**4.25 bits/value**, or **0.53125 bytes/value** before padding and other metadata.
+That is about 47% smaller than a one-byte INT8 payload, equivalent to a 1.88×
+payload reduction factor. Measure complete resident storage and
+traffic, including scales, mixed-precision layers and activation quantization.
+The format and scale layout are documented in the
+[OCP microscaling specification](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf)
+and [Triton `dot_scaled` reference](https://triton-lang.org/main/python-api/generated/triton.language.dot_scaled.html).
+
+**Existing Q4 support does not supply this native FP4 path.**
+`kernels/w4a8.py` consumes GGUF Q4_K/Q6_K integer weights with INT8 arithmetic;
+`kernels/amd_w4a16.py` dequantizes k-quant weights to FP16 before multiplication.
+Neither is packed E2M1/E8M0 native MXFP4. The current server accepts `bf16`,
+`int8`, `w4a8` and `w4a16`, with `auto` selection; it has no `mxfp4` profile.
+GGUF Q4_K_M cannot simply be reinterpreted as MXFP4.
+
+To use the full FP4 compute-rate comparison, qualify native FP4 operands on
+both sides of the product. A storage-only FP4 route or a mixed FP4/FP8 route
+needs its own measured ceiling. Activation quantization, scale loads, layouts,
+small M, padding, GDN and request overhead still matter. Do not infer native
+execution from a Python API name: `dot_scaled` can also use software emulation.
+
+### Current INT8 measurements and geometry
 
 The machine sustained 5.77 TB/s in a large streaming-copy test and 2,785 TOPS in
 an 8192³ library INT8 GEMM. These are reference measurements for those tests.
@@ -108,12 +174,19 @@ can accompany a lower observed bandwidth rate.
 
 ## 4. Ordered implementation work
 
+Start with P0, then F1–F3. Complete an early FP4 feasibility and quality review
+before investing deeply in new INT8 GEMM designs. P3 GDN tuning benefits both
+tracks and follows the largest remaining measured bottleneck. P1/P2 remain
+the exact INT8 alternative if FP4 quality or native execution is inadequate.
+
 ### P0 — Freeze a stronger measurement and correctness harness
 
 **Purpose:** make each experiment comparable to the current optimized version.
 
-- Freeze request bodies, rendering/none-option settings, GGUF/tokenizer/config
-  identities, calibration identity and the baseline commit.
+- Freeze request bodies, rendering/none-option settings, model/tokenizer/config
+  identities, calibration identities and the baseline commit. Preserve the
+  current INT8 fixtures and create an original-BF16 quality reference before
+  evaluating FP4. Separate calibration/development data from held-out evaluation.
 - Extend the matrix harness to the actual engine layouts: output strides,
   sliced projections, row-scale layouts, pointer alignment and live-row masks.
   Include allocated/live pairs such as `192/144`, `384/361`, and `1280/1185`,
@@ -130,11 +203,84 @@ can accompany a lower observed bandwidth rate.
   proposed implementation. The existing `baseline` switch selects the older
   untuned rule, so it is insufficient by itself for next-version claims.
 
-**Exit gate:** repeatable current-version results, exact-output references and
-a shape-by-shape time/traffic/padding breakdown. Investigate >3% drift before
-ranking candidates. Keep checkpoint loading and calibration outside timings.
+**Exit gate:** repeatable current-version results, exact INT8 references,
+BF16 decision-quality references and a shape-by-shape time/traffic/padding
+breakdown. Investigate >3% drift before ranking candidates. Keep checkpoint
+loading and calibration outside timings; include runtime activation quantization.
+
+### F1 — Prove native MXFP4 execution and qualify a quantization recipe
+
+1. Compile a minimal packed E2M1/E8M0 GEMM on the installed `gfx950` stack.
+   Evaluate Triton `tl.dot_scaled` and an applicable AITER kernel; verify their
+   actual availability, supported shapes and capture behavior before choosing.
+   Inspect disassembly for scaled FP4 MFMA instructions and rule out a full
+   BF16/FP16 dequantization-and-GEMM fallback. A successful API call alone is
+   insufficient. Pin any necessary stack change as a separate experiment.
+2. Build an independent pack/unpack and scale reference. Cover scale axes,
+   nibble order, rounding, saturation, zero blocks, extreme values, partial
+   blocks and alignment. Specify handling of non-finite inputs. Confirm the
+   kernel consumes the same quantized operands as this reference.
+3. Convert original BF16 weights offline with a reproducible recipe and a
+   versioned payload/scale manifest. Check available Quark tooling for this
+   model rather than assuming a published recipe for another model transfers.
+   Never substitute GGUF Q4_K bytes for FP4 payloads.
+4. Measure weight-only error first, then the additional error from dynamic
+   per-32 activation quantization. Use representative short, long and
+   multi-question calibration prompts. Examine outlier blocks, each layer's
+   output error and final decision margins before expanding FP4 coverage.
+5. Keep sensitive projections at higher precision when an ablation shows a
+   quality loss. Evaluate rescaling/clipping recipes on development data and
+   freeze the selected recipe before running the held-out release suite.
+
+**Exit gate:** demonstrated native scaled-MFMA execution, validated encoding,
+an original-weight conversion manifest and a feasible recipe within section 5's
+quality budget. If unavailable or inaccurate, record the specific blocker and
+continue exact INT8 optimization; do not relabel W4A8 as native FP4.
+
+### F2 — Optimize complete native FP4 projections for decision shapes
+
+- Benchmark actual live/bucket pairs and projection layouts from P0, especially
+  144 live rows in a 192-row bucket. Include body, read and sliced final-layer
+  projections. Large square GEMM results cannot qualify these kernels.
+- Time **activation quantization + packing/scales + GEMM + epilogue**, including
+  all intermediate traffic. Compare separate and fused quantization only when
+  their quantized values and scale semantics agree.
+- Tune payload/scale layouts together, tile geometry, tail handling, weight
+  reuse and XCD locality. Include layout conversion and scratch in the cost;
+  prepack static weights outside the timed request.
+- Record useful FP4 FLOPS, issued work, scale overhead, external read/write
+  traffic, register/LDS use and memory bounds. Rotate weights beyond cache and
+  separate hot-weight tests, as for INT8.
+- Reprofile the model after each coverage change. Prioritize the next largest
+  contributor, including GDN, rather than maximizing isolated FP4 peak rate.
+
+**Landing gate:** section 5's numerical/quality checks and a repeatable ≥1.5×
+whole-request gain for the primary workload versus the current tuned INT8
+version. This is an intermediate gate; the release target remains ≤12 ms.
+Keep INT8 dispatch for shapes or layers that fail the full-path latency gate.
+
+### F3 — Integrate an explicit FP4 precision profile
+
+- Add a proposed `--precision mxfp4` profile with explicit model-artifact,
+  quantization-recipe and kernel identities. This option does not exist today.
+  Report effective layer precisions in runtime metadata and benchmark results.
+- Allocate payload, scale and scratch buffers before graph capture. Preserve
+  lifetimes across replay, live-row masking, evidence sharing and state reuse.
+- Validate artifact format, dimensions, scales and `gfx950`/runtime support at
+  load. Do not silently interpret Q4_K_M as MXFP4. If FP4 cannot run, provide a
+  clear error or an explicitly reported validated INT8 fallback with its own
+  matching artifact; never change precision invisibly.
+- Start with the requested single-GPU text decision workload. Qualify AutoThink,
+  vision, tensor parallelism and other model sizes separately before advertising
+  FP4 support for them. Preserve their existing validated paths.
+
+**Exit gate:** graph-enabled end-to-end FP4 decisions, explicit coverage and
+fallback metadata, passing quality/isolation checks and measured latency on
+all five request suites. A standalone FP4 GEMM is not model-level support.
 
 ### P1 — Compare a library INT32 route on the real projection shapes
+
+This is the exact INT8 track; its arithmetic requirements do not apply to FP4.
 
 **Hypothesis:** some shapes benefit from the installed library's INT8 GEMM
 implementation, even after paying for its output processing.
@@ -201,6 +347,8 @@ Retain a shape-specific fallback. Avoid an unbounded startup search.
 
 ### P3 — Tune GDN for MI355X resources
 
+This work is shared by the INT8 and MXFP4 tracks.
+
 The current `gfx950` GDN launch parameters match the conservative Radeon
 profile: `HREC_BV=16`, `OUT_BV=32`, and one stage for those kernels. MI355X
 measurements justify a separate search.
@@ -222,7 +370,8 @@ exact path.
 
 ### P4 — Remove remaining intermediate traffic and launch work
 
-Proceed after P1–P3 establish the remaining profile.
+Proceed after native FP4 integration or the selected INT8 improvements, and
+GDN tuning, establish the remaining profile.
 
 - Expand deferred residual folding where it removes an intermediate write and
   read while preserving the existing scale/add/norm order.
@@ -231,7 +380,8 @@ Proceed after P1–P3 establish the remaining profile.
   in the timing.
 - Preserve the full-row activation scale. The existing W8A8 `EPI=2` path uses
   tile-local SwiGLU scales; it is not a direct replacement for the engine's
-  current full-row SmoothQuant path.
+  current full-row SmoothQuant path. For FP4, preserve its independently
+  qualified per-32 scale/rounding recipe when fusing producers or consumers.
 - Evaluate a small number of additional graph buckets only if measured tail
   waste remains material. Include planner buffer sizing, chunk capacity, graph
   memory and cold-start cost in that experiment.
@@ -244,9 +394,9 @@ displace a larger unresolved bottleneck.
 
 ## 5. Release validation
 
-### Correctness
+### Exact INT8 correctness
 
-Require all of the following before enabling a candidate by default:
+Require all of the following for the exact INT8 candidate:
 
 - Kernel products and epilogues match the current INT8 arithmetic bit for bit,
   including extreme inputs, sliced/non-contiguous outputs, partial live rows,
@@ -263,11 +413,49 @@ Require all of the following before enabling a candidate by default:
   the existing numerical thresholds. Expand the current 33-test suite to cover
   each new implementation; a fixed test count is not the acceptance criterion.
 
+### Native MXFP4 correctness and decision quality
+
+Do not require FP4 logits to match INT8 exactly. Require the following instead:
+
+- Compare encoding and scale generation against the independent reference.
+  Compare GEMM/epilogue arithmetic against a high-precision computation on the
+  **same quantized tensors**, separating kernel error from quantization error.
+  Fix justified absolute/relative error limits before tuning; FP32 accumulation
+  order need not match a CPU reduction bit for bit.
+- Evaluate final decisions against original BF16 and current INT8 on a frozen,
+  representative held-out suite: short/long evidence, multiple questions,
+  wide option lists, none-options and near ties. Report task accuracy and
+  per-suite counts, decision agreement, probability changes and margin flips.
+  Existing 11-case fixtures are regression checks, not sufficient quality data.
+- Use **provisional planning budgets** of ≤0.5 percentage-point aggregate task
+  accuracy loss and ≤1 point for any suite versus original BF16. Freeze the
+  final task-specific budgets and sufficiently large evaluation set before
+  experimentation; these figures are proposals, not approved quality claims.
+  Publish sample sizes and uncertainty, and compare against INT8 as well.
+- Retain the validated precision of recurrent state, norms and decision readout
+  unless separately qualified. Record all higher-precision exceptions and
+  weight/activation calibration identities; do not tune on held-out failures.
+- Check deterministic replay, usage and exact batch/cache isolation within the
+  FP4 profile, including mixed live counts and shared evidence. A numerically
+  approximate model still needs correct request and state isolation. If exact
+  batch invariance cannot be retained, document that gap and keep the profile
+  experimental rather than inheriting the existing guarantee.
+- Exercise the common cache, graph, API and fallback cases above. Rerun TP,
+  AutoThink or vision checks before extending FP4 support to those features.
+
+Enable FP4 by default only after both quality and latency qualification.
+Passing a microbenchmark or matching quantized GEMM arithmetic alone is
+insufficient. Retain the exact INT8 path if FP4 does not meet the agreed budget.
+
 ### Performance and reproducibility
 
 - Compare current commit `4534c11` against the candidate with identical inputs
-  and API settings. Do not regenerate calibration, change precision, omit
-  questions or substitute cache hits during the comparison.
+  and API settings. Do not omit questions or substitute cache hits. For exact
+  INT8 comparisons, keep weights, precision and calibration unchanged. For the
+  FP4 comparison, precision and its conversion/calibration recipe intentionally
+  change; freeze them before timing and report these changes with quality
+  results. Use the same source model revision and matched precision of other
+  features. Label hybrid coverage and FP4-specific stack changes explicitly.
 - Use an otherwise unoccupied visible GPU and stable power/clock policy. Record
   stack, device, memory use and relevant telemetry; do not change shared-host
   controls for the experiment.
@@ -297,15 +485,21 @@ Record additional scratch and graph-memory bounds. Update the Docker image,
 qualification tables and kernel identities together. An unsupported or unmatched
 configuration must retain a validated implementation.
 
+Keep FP4 opt-in until its quality and feature coverage qualify it for default
+selection. Store the INT8 fallback artifact separately and include its memory
+and load costs if resident fallback is offered. Do not claim simultaneous
+FP4/INT8 residency is free.
+
 ## 6. Milestones and deliverables
 
 | Milestone | Deliverable | Exit condition |
 |---|---|---|
-| M0 | Frozen fixtures, current-version selector and live-row/traffic ledger | Reproducible `4534c11` results and exact references |
-| M1 | Qualified library route and first reuse/tail prototypes | Primary HTTP p50 ≤16 ms, or a recorded experiment failure with the next hypothesis |
-| M2 | Selected persistent/tail kernels and MI355X GDN configuration | Primary HTTP p50 ≤12 ms and the workload targets in section 2 |
-| M3 | Complete correctness, mixed-workload and service qualification | No correctness failures, no unexplained >3% regressions, stable memory and usable fallback |
-| Stretch | Further reuse/fusion experiments | Primary HTTP p50 ≤9 ms with the same numerical contract |
+| M0 | Frozen INT8/BF16 references, selector, live-row ledger and FP4 instruction probe | Reproducible `4534c11` results and demonstrated native scaled FP4 MFMA |
+| M1 | Reproducible BF16-to-MXFP4 conversion and sensitivity/quality report | Valid encoding, independent kernel reference and feasible frozen quality recipe |
+| M2 | Graph-enabled native FP4 projections and explicit precision profile | ≥1.5× primary request speedup versus tuned INT8, passing quality gates; all suite results reported |
+| M3 | Selected FP4/hybrid coverage, GDN improvements and full qualification | Primary HTTP p50 ≤12 ms, all section 2 targets and quality gates, stable memory and usable INT8 fallback |
+| INT8 alternative | Library/reuse/tail improvements under the original numerical contract | Separately reported exact-output results; same latency targets, no FP4 claim |
+| Stretch | Further native FP4 reuse, GDN and fusion work | Primary HTTP p50 ≤9 ms while retaining the qualified FP4 quality contract |
 
 Track each experiment with its hypothesis, code/config identity, affected
 shapes, memory cost, correctness result, kernel result and whole-request result.
@@ -315,12 +509,23 @@ move to the next measured bottleneck.
 
 Expected implementation touchpoints:
 
-- `startlux_prism/kernels/w8a8.py` and a separate MI355X GEMM module.
+- A new MXFP4 packing/quantization and native GEMM implementation, model loader
+  support and an offline conversion tool with a versioned artifact manifest.
+- `startlux_prism/server.py` and precision options/dispatch in the engine.
+- `startlux_prism/kernels/w8a8.py` and a separate MI355X INT8 GEMM module.
 - `startlux_prism/kernels/quant.py`, especially deferred folds and row scales.
 - `startlux_prism/kernels/gdn.py` and `engine/model.py`.
 - `bench/mi355x_*.py`, `bench/profile.py` and the MI355X dispatch tests.
 - The versioned qualification tables, Docker image and performance report.
 
-A release report should include a raw-results manifest, exact-output summary,
-per-suite latency table, counter/roofline analysis, memory/cold-start costs,
-enabled dispatch ranges and remaining gaps against the targets above.
+A release report should include a raw-results manifest, separate INT8 exactness
+and FP4 quality summaries, per-suite latency table, counter/roofline analysis,
+quantization/coverage details, memory/cold-start costs, enabled dispatch ranges
+and remaining gaps against the targets above.
+
+## 7. Native FP4 references
+
+- [AMD MI355X datasheet](https://www.amd.com/content/dam/amd/en/documents/instinct-tech-docs/product-briefs/amd-instinct-mi355x-gpu-brochure.pdf): dense arithmetic peaks, HBM bandwidth and cache capacity.
+- [OCP microscaling formats specification](https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf): MXFP4 representation and block scaling.
+- [Triton `dot_scaled` API](https://triton-lang.org/main/python-api/generated/triton.language.dot_scaled.html): operand formats, packing and E8M0 scale layout; also documents possible software emulation.
+- [AMD native MXFP4 serving example](https://rocm.blogs.amd.com/software-tools-optimization/kimi-k25-mxfp4-atom/README.html): a concrete `gfx950` scaled-MFMA integration using dynamic FP4 activations. This is evidence of the hardware/software route, not a ready-made StartLux integration or transferable accuracy result.
