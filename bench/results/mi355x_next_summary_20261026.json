@@ -1,0 +1,139 @@
+{
+  "date": "2026-10-26",
+  "baseline": "4534c11",
+  "profile": "27B original-weight native MXFP4, paired H32 rotation, ceil scales",
+  "device": {
+    "hip_ordinal": 0,
+    "pci_bus_id": "0000:75:00.0",
+    "management_index": 3
+  },
+  "http": {
+    "yesno": {
+      "int8-stock": {
+        "n": 300,
+        "p50_ms": 15.982422512024641,
+        "p95_ms": 16.109786927700043
+      },
+      "int8-next": {
+        "n": 300,
+        "p50_ms": 15.39067947305739,
+        "p95_ms": 15.521065331995487
+      },
+      "mxfp4-r32": {
+        "n": 300,
+        "p50_ms": 10.862943716347218,
+        "p95_ms": 10.952932760119438
+      }
+    },
+    "review1": {
+      "int8-stock": {
+        "n": 300,
+        "p50_ms": 18.305758712813258,
+        "p95_ms": 18.408341333270073
+      },
+      "int8-next": {
+        "n": 300,
+        "p50_ms": 17.63306651264429,
+        "p95_ms": 17.710739746689796
+      },
+      "mxfp4-r32": {
+        "n": 300,
+        "p50_ms": 12.412546901032329,
+        "p95_ms": 12.512594927102327
+      }
+    },
+    "readme3": {
+      "int8-stock": {
+        "n": 300,
+        "p50_ms": 20.65822738222778,
+        "p95_ms": 20.738269668072462
+      },
+      "int8-next": {
+        "n": 300,
+        "p50_ms": 20.14959859661758,
+        "p95_ms": 20.23239526897669
+      },
+      "mxfp4-r32": {
+        "n": 300,
+        "p50_ms": 14.556879177689552,
+        "p95_ms": 14.682102017104626
+      }
+    },
+    "startlux3": {
+      "int8-stock": {
+        "n": 300,
+        "p50_ms": 34.59856007248163,
+        "p95_ms": 34.72086088731885
+      },
+      "int8-next": {
+        "n": 300,
+        "p50_ms": 30.42341163381934,
+        "p95_ms": 30.522385146468878
+      },
+      "mxfp4-r32": {
+        "n": 300,
+        "p50_ms": 22.029934450984,
+        "p95_ms": 22.121723741292953
+      }
+    },
+    "longpage2": {
+      "int8-stock": {
+        "n": 300,
+        "p50_ms": 95.94906703568995,
+        "p95_ms": 96.1367292329669
+      },
+      "int8-next": {
+        "n": 300,
+        "p50_ms": 80.51164704374969,
+        "p95_ms": 80.75904101133347
+      },
+      "mxfp4-r32": {
+        "n": 300,
+        "p50_ms": 56.96359043940902,
+        "p95_ms": 57.29401623830199
+      }
+    }
+  },
+  "http_samples": 4500,
+  "paired_engine_samples": 5000,
+  "public_quality": {
+    "bf16": {
+      "correct": 213,
+      "total": 231
+    },
+    "all": {
+      "correct": 213,
+      "total": 231
+    }
+  },
+  "public_argmax_disagreements": 6,
+  "model_validation": {
+    "artifact": "/workspace/models/StartLux-Decision-v1.1-27B-AutoThink-MXFP4-R32",
+    "passed": true,
+    "checks": {
+      "artifact_direct_eager_graph_exact": true,
+      "alone_reorder_mixed_unshared_exact": true,
+      "cache_miss_hit_eviction_exact": true
+    },
+    "requests": 10000,
+    "allocated_before": 19993782784,
+    "allocated_after": 19993782784,
+    "peak_allocated": 55189419520
+  },
+  "tests": {
+    "passed": 57,
+    "subtests": 11
+  },
+  "fp4_experimental": true,
+  "primary_target_ms": 12,
+  "primary_target_met": false,
+  "benchmark_image_id": "sha256:af7ba6ab6b975fb47892a2405bc03c8cd213f215dce3a20ec9ed7956906db4b4",
+  "final_image_id": "sha256:5f046478756b3c185273cdb5357feafae0fbae3c7761fdb5bae299a15df2caa7",
+  "source_sha256": {
+    "startlux_prism/kernels/mxfp4.py": "d0e9783ffc783b2fa71d28bd9f33291947daaedcef46ba48b5cf3b35927baff5",
+    "startlux_prism/kernels/gdn.py": "4fe9047a35f80144f05b083fd99e8530bb6c4ab5138727dd4bb4b8e1b22d5aa5",
+    "startlux_prism/engine/model.py": "638395f398d6d351712b7931616b5d94376db43d0afc4b4b2ce562f49618db75",
+    "startlux_prism/hf_weights.py": "5814c5f1faca2b2990c6d3adff22f26bc76abbccbce05af5ee84d15b4ea6f383",
+    "startlux_prism/mxfp4_artifact.py": "a3700572c42cb3009b0729d820fa8d98610faad526319be0ea8b167686ad1dfd"
+  }
+}

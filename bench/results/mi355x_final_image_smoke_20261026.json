@@ -1,0 +1,394 @@
+{
+  "image": "startlux-prism:mi355x-next",
+  "rounds": 1,
+  "measurements": [
+    {
+      "round": 0,
+      "profile": "mxfp4-r32",
+      "suite": "yesno",
+      "samples_ms": [
+        10.821531061083078,
+        10.777212679386139,
+        10.809001978486776
+      ],
+      "median_ms": 10.809001978486776
+    },
+    {
+      "round": 0,
+      "profile": "mxfp4-r32",
+      "suite": "review1",
+      "samples_ms": [
+        12.31953501701355,
+        12.292716186493635,
+        12.281786184757948
+      ],
+      "median_ms": 12.292716186493635
+    },
+    {
+      "round": 0,
+      "profile": "mxfp4-r32",
+      "suite": "readme3",
+      "samples_ms": [
+        14.737578108906746,
+        14.678959269076586,
+        14.667088631540537
+      ],
+      "median_ms": 14.678959269076586
+    },
+    {
+      "round": 0,
+      "profile": "mxfp4-r32",
+      "suite": "startlux3",
+      "samples_ms": [
+        22.15702785179019,
+        22.076649125665426,
+        22.023049648851156
+      ],
+      "median_ms": 22.076649125665426
+    },
+    {
+      "round": 0,
+      "profile": "mxfp4-r32",
+      "suite": "longpage2",
+      "samples_ms": [
+        57.10606696084142,
+        57.09333624690771,
+        57.127065025269985
+      ],
+      "median_ms": 57.10606696084142
+    }
+  ],
+  "health": {
+    "mxfp4-r32": {
+      "status": "ok",
+      "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+      "precision": "mxfp4",
+      "tp": 1,
+      "backend": "rocm",
+      "architecture": "gfx950",
+      "graphs": true,
+      "kv_fp8": false,
+      "max_tokens": 4096,
+      "batch_tokens": 4096,
+      "kind": "auto_think",
+      "think_mode": "never",
+      "none_check": true,
+      "allow_none": true,
+      "images": false,
+      "max_images": 0,
+      "experimental": true,
+      "mxfp4_components": "all",
+      "mxfp4_scaling": "ceil",
+      "mxfp4_rotate": true,
+      "offline_artifact": true,
+      "weight_source": "original_bf16"
+    }
+  },
+  "responses": {
+    "mxfp4-r32": {
+      "yesno": {
+        "answers": {
+          "urgent": {
+            "type": "noul",
+            "noul": 0.7152668268556756
+          }
+        },
+        "usage": {
+          "input_tokens": 85,
+          "output_tokens": 0
+        },
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "latency_ms": 10.673,
+        "timings": {
+          "tokens": 55,
+          "bucket": 64,
+          "read": 1,
+          "read_bucket": 1,
+          "segments": 2,
+          "host_ms": 0.056,
+          "gpu_ms": 10.533,
+          "launch_to_logits_ms": 10.533,
+          "stream_elapsed_ms": 10.495,
+          "direct": true,
+          "queue_to_prepare_ms": 0.0,
+          "batch_groups": 1,
+          "submit_to_result_ms": 10.628,
+          "stages_ms": {
+            "start": 0.002,
+            "split": 0.007,
+            "rows": 0.012,
+            "forward": 10.639,
+            "answers": 0.001
+          }
+        }
+      },
+      "review1": {
+        "answers": {
+          "stars": {
+            "type": "score",
+            "score": 0.3837261722974528,
+            "confidence": 0.6802281897521226,
+            "legend": {
+              "0": "1",
+              "1": "2",
+              "2": "3",
+              "3": "4",
+              "4": "5"
+            },
+            "probabilities": {
+              "0": 0.7158132186466788,
+              "1": 0.2365243811208339,
+              "2": 0.017050543701482186,
+              "3": 0.00934672235036592,
+              "4": 0.021265134180639196
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 107,
+          "output_tokens": 0
+        },
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "latency_ms": 12.195,
+        "timings": {
+          "tokens": 77,
+          "bucket": 128,
+          "read": 1,
+          "read_bucket": 1,
+          "segments": 2,
+          "host_ms": 0.054,
+          "gpu_ms": 12.061,
+          "launch_to_logits_ms": 12.061,
+          "stream_elapsed_ms": 12.028,
+          "direct": true,
+          "queue_to_prepare_ms": 0.0,
+          "batch_groups": 1,
+          "submit_to_result_ms": 12.141,
+          "stages_ms": {
+            "start": 0.002,
+            "split": 0.008,
+            "rows": 0.018,
+            "forward": 12.151,
+            "answers": 0.007
+          }
+        }
+      },
+      "readme3": {
+        "answers": {
+          "team": {
+            "type": "choice",
+            "choice": "billing",
+            "confidence": 0.9702881246601012,
+            "probabilities": {
+              "billing": 0.9801920831067341,
+              "shipping": 0.0004045313463377673,
+              "technical": 0.019403385546928116
+            },
+            "none_probability": 0.003861582933842726
+          },
+          "urgent": {
+            "type": "noul",
+            "noul": 0.7152668268556756
+          },
+          "severity": {
+            "type": "score",
+            "score": 1.7770514102933979,
+            "confidence": 0.6655771154400967,
+            "legend": {
+              "0": "cosmetic",
+              "1": "annoying",
+              "2": "blocks the customer"
+            },
+            "probabilities": {
+              "0": 0.008117421769924492,
+              "1": 0.20671374616675328,
+              "2": 0.7851688320633223
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 297,
+          "output_tokens": 0
+        },
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "latency_ms": 14.492,
+        "timings": {
+          "tokens": 155,
+          "bucket": 192,
+          "read": 3,
+          "read_bucket": 4,
+          "segments": 4,
+          "host_ms": 0.112,
+          "gpu_ms": 14.215,
+          "launch_to_logits_ms": 14.215,
+          "stream_elapsed_ms": 14.171,
+          "direct": true,
+          "queue_to_prepare_ms": 0.0,
+          "batch_groups": 1,
+          "submit_to_result_ms": 14.364,
+          "stages_ms": {
+            "start": 0.003,
+            "split": 0.028,
+            "rows": 0.041,
+            "forward": 14.391,
+            "answers": 0.012
+          }
+        }
+      },
+      "startlux3": {
+        "answers": {
+          "team": {
+            "type": "choice",
+            "choice": "billing",
+            "confidence": 0.8423099719149234,
+            "probabilities": {
+              "billing": 0.8817324789361926,
+              "access": 0.11361409605726353,
+              "technical": 0.0035924255597372026,
+              "sales": 0.0010609994468067114
+            },
+            "none_probability": 0.0062798958832521335
+          },
+          "urgent": {
+            "type": "noul",
+            "noul": 0.8056033249179627
+          },
+          "severity": {
+            "type": "score",
+            "score": 2.3201757810621975,
+            "confidence": 0.6610544697022831,
+            "legend": {
+              "0": "cosmetic",
+              "1": "minor inconvenience",
+              "2": "blocks part of the team",
+              "3": "blocks the whole business"
+            },
+            "probabilities": {
+              "0": 0.0018323340945521542,
+              "1": 0.005720206428655301,
+              "2": 0.6628868037968353,
+              "3": 0.32956065567995724
+            }
+          }
+        },
+        "usage": {
+          "input_tokens": 898,
+          "output_tokens": 0
+        },
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "latency_ms": 21.774,
+        "timings": {
+          "tokens": 372,
+          "bucket": 384,
+          "read": 3,
+          "read_bucket": 4,
+          "segments": 4,
+          "host_ms": 0.104,
+          "gpu_ms": 21.501,
+          "launch_to_logits_ms": 21.501,
+          "stream_elapsed_ms": 21.465,
+          "direct": true,
+          "queue_to_prepare_ms": 0.0,
+          "batch_groups": 1,
+          "submit_to_result_ms": 21.648,
+          "stages_ms": {
+            "start": 0.002,
+            "split": 0.03,
+            "rows": 0.039,
+            "forward": 21.674,
+            "answers": 0.013
+          }
+        }
+      },
+      "longpage2": {
+        "answers": {
+          "next": {
+            "type": "choice",
+            "choice": "o4039",
+            "confidence": 0.9541108024021188,
+            "probabilities": {
+              "o4000": 0.005274214239696637,
+              "o4003": 0.002618419874972915,
+              "o4006": 0.0015058380869194356,
+              "o4009": 0.003368800064190752,
+              "o4012": 0.00173798764246018,
+              "o4015": 0.0014115945290739812,
+              "o4018": 0.002083368905918947,
+              "o4021": 0.00129630573272493,
+              "o4024": 0.0043046635706791144,
+              "o4027": 0.0014957215924518113,
+              "o4030": 0.00320651580507949,
+              "o4033": 0.00852806032522487,
+              "o4036": 0.005779907400068093,
+              "o4039": 0.9573886022305389
+            },
+            "none_probability": 0.0061694073960871995
+          },
+          "done": {
+            "type": "noul",
+            "noul": 0.42915971708973816
+          }
+        },
+        "usage": {
+          "input_tokens": 2177,
+          "output_tokens": 0
+        },
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "latency_ms": 56.861,
+        "timings": {
+          "tokens": 1194,
+          "bucket": 1280,
+          "read": 2,
+          "read_bucket": 2,
+          "segments": 3,
+          "host_ms": 0.118,
+          "gpu_ms": 56.581,
+          "launch_to_logits_ms": 56.581,
+          "stream_elapsed_ms": 56.545,
+          "direct": true,
+          "queue_to_prepare_ms": 0.0,
+          "batch_groups": 1,
+          "submit_to_result_ms": 56.729,
+          "stages_ms": {
+            "start": 0.002,
+            "split": 0.037,
+            "rows": 0.05,
+            "forward": 56.751,
+            "answers": 0.007
+          }
+        }
+      }
+    }
+  },
+  "concurrency": {
+    "mxfp4-r32": {
+      "health": {
+        "status": "ok",
+        "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+        "precision": "mxfp4",
+        "tp": 1,
+        "backend": "rocm",
+        "architecture": "gfx950",
+        "graphs": true,
+        "kv_fp8": false,
+        "max_tokens": 4096,
+        "batch_tokens": 4096,
+        "kind": "auto_think",
+        "think_mode": "never",
+        "none_check": true,
+        "allow_none": true,
+        "images": false,
+        "max_images": 0,
+        "experimental": true,
+        "mxfp4_components": "all",
+        "mxfp4_scaling": "ceil",
+        "mxfp4_rotate": true,
+        "offline_artifact": true,
+        "weight_source": "original_bf16"
+      },
+      "clients": 8,
+      "requests": 32,
+      "exact_answers": true
+    }
+  }
+}

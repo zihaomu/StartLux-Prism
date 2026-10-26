@@ -1,12 +1,16 @@
 # MI355X next-version speedup plan: native MXFP4 first
 
-Status: proposed. Date: 2026-10-26.
+Status: implementation in progress. Date: 2026-10-26.
+Completed stages and rejected experiments are in the
+[execution results](mi355x_next_version_results.md).
 
 The next version should prioritize **native MXFP4 on MI355X** to reduce
 single-GPU 27B decision latency. The primary release target is **12 ms HTTP p50
 for `readme3`**, compared with the current INT8 result of 20.54 ms. A 9 ms result
 is a stretch goal. These are engineering targets, not measured FP4 results or
-promised gains. No native MXFP4 runtime has been implemented or measured here.
+promised gains. Native MXFP4 execution, original-weight conversion and an
+experimental precision profile now exist; qualification and remaining targets
+are tracked in the execution results.
 
 The plan has two tracks:
 
@@ -123,8 +127,8 @@ and [Triton `dot_scaled` reference](https://triton-lang.org/main/python-api/gene
 **Existing Q4 support does not supply this native FP4 path.**
 `kernels/w4a8.py` consumes GGUF Q4_K/Q6_K integer weights with INT8 arithmetic;
 `kernels/amd_w4a16.py` dequantizes k-quant weights to FP16 before multiplication.
-Neither is packed E2M1/E8M0 native MXFP4. The current server accepts `bf16`,
-`int8`, `w4a8` and `w4a16`, with `auto` selection; it has no `mxfp4` profile.
+Neither is packed E2M1/E8M0 native MXFP4. The server now has a separate,
+experimental `mxfp4` profile alongside `bf16`, `int8`, `w4a8` and `w4a16`.
 GGUF Q4_K_M cannot simply be reinterpreted as MXFP4.
 
 To use the full FP4 compute-rate comparison, qualify native FP4 operands on
@@ -261,8 +265,8 @@ Keep INT8 dispatch for shapes or layers that fail the full-path latency gate.
 
 ### F3 — Integrate an explicit FP4 precision profile
 
-- Add a proposed `--precision mxfp4` profile with explicit model-artifact,
-  quantization-recipe and kernel identities. This option does not exist today.
+- Qualify the implemented experimental `--precision mxfp4` profile with explicit
+  model-artifact, quantization-recipe and kernel identities.
   Report effective layer precisions in runtime metadata and benchmark results.
 - Allocate payload, scale and scratch buffers before graph capture. Preserve
   lifetimes across replay, live-row masking, evidence sharing and state reuse.
@@ -349,9 +353,10 @@ Retain a shape-specific fallback. Avoid an unbounded startup search.
 
 This work is shared by the INT8 and MXFP4 tracks.
 
-The current `gfx950` GDN launch parameters match the conservative Radeon
-profile: `HREC_BV=16`, `OUT_BV=32`, and one stage for those kernels. MI355X
-measurements justify a separate search.
+The `4534c11` baseline's `gfx950` GDN launch parameters match the conservative
+Radeon profile: `HREC_BV=16`, `OUT_BV=32`, and one stage for those kernels.
+The selected next-version values and exact-output validation are recorded in
+the execution results.
 
 - Evaluate recurrence value widths 16/32/64 and output widths 32/64/128, with
   bounded stage and warp choices. Record register/LDS pressure and occupancy.

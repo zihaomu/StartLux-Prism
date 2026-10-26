@@ -341,5 +341,28 @@
       },
       "sha256": "8c4c83828c459df958a1c81083ac611d41df1d204f2d250f555cb6ea1ce041f1"
     }
-  }
+  },
+  "http_geometry": {
+    "startlux3": {
+      "computed_tokens": 372,
+      "bucket": 384
+    },
+    "readme3": {
+      "computed_tokens": 155,
+      "bucket": 192
+    },
+    "yesno": {
+      "computed_tokens": 55,
+      "bucket": 64
+    },
+    "longpage2": {
+      "computed_tokens": 1194,
+      "bucket": 1280
+    },
+    "review1": {
+      "computed_tokens": 77,
+      "bucket": 128
+    }
+  },
+  "http_geometry_source": "bench/mi355x_mxfp4_model.py, matching v1.1 none-option prompts"
 }

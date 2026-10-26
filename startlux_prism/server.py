@@ -177,10 +177,15 @@ class Backend:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--gguf", required=True)
+    ap.add_argument("--gguf", required=True, help="GGUF file, or an original BF16 directory for the research BF16/MXFP4 paths")
     ap.add_argument("--model-dir", required=True)
-    ap.add_argument("--precision", default="auto", choices=("auto", "bf16", "int8", "w4a8", "w4a16"),
+    ap.add_argument("--precision", default="auto", choices=("auto", "bf16", "int8", "w4a8", "w4a16", "mxfp4"),
                     help="auto: w4a8 for a k-quant file (Q4_K_M: its own 4-bit weights), int8 (W8A8) for Q8_0")
+    ap.add_argument("--mxfp4-components", choices=("gu", "down", "mlp", "all"), default="all",
+                    help="experimental native FP4 projection coverage; accuracy must be qualified independently")
+    ap.add_argument("--mxfp4-scaling", choices=("ceil", "mse"), default="ceil")
+    ap.add_argument("--mxfp4-rotate", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument("--mxfp4-artifact", default="", help="offline MXFP4 projections; retain the original BF16 source directory")
     ap.add_argument("--calib", default="",
                     help="int8: the activation ranges file, computed and saved on the first start (default: "
                          "~/.cache/startlux-prism/calib/<model file>-<size>-v1.pt, under $STARTLUX_PRISM_CACHE if set)")
@@ -251,7 +256,7 @@ def main():
     t_start = time.perf_counter()
     P.on()                                           # start-up progress on stdout (progress.py)
     from .vision import find_mmproj, is_mmproj
-    if is_mmproj(a.gguf):
+    if not os.path.isdir(a.gguf) and is_mmproj(a.gguf):
         sys.exit(f"{a.gguf} is a vision projector (mmproj): pass the model's GGUF as --gguf and this one as --mmproj")
     try:
         mmproj, text_only = find_mmproj(a.mmproj, a.gguf, a.model_dir)
@@ -262,7 +267,7 @@ def main():
                                  "without images")
     from . import calib as CAL
     if a.precision == "auto":
-        a.precision = CAL.auto_precision(a.gguf)
+        a.precision = "bf16" if os.path.isdir(a.gguf) else CAL.auto_precision(a.gguf)
     if a.precision == "int8" and not a.calib:
         a.calib = CAL.default_path(a.gguf)
     if a.kv_fp8 and a.attn_qk8:
@@ -276,7 +281,7 @@ def main():
     a.name = a.name or re.sub(r"-Q8_0$", "", os.path.basename(a.gguf).removesuffix(".gguf")) + " (StartLux-Prism)"
     from .gguf import GGUFFile
     from .modelcfg import folder_kind
-    kind = folder_kind(a.model_dir, GGUFFile(a.gguf).meta)
+    kind = folder_kind(a.model_dir, {} if os.path.isdir(a.gguf) else GGUFFile(a.gguf).meta)
     sys.setswitchinterval(a.switch_interval)
     gpu = torch.cuda.get_device_properties(0)
     if a.kv_fp8 and not supports_kv_fp8():
@@ -285,7 +290,8 @@ def main():
     P.step(f"StartLux-Prism: {os.path.basename(a.gguf)} ({label}) as "
            f"{a.precision} on {gpu.name} ({architecture()}, {gpu.total_memory / 2**30:.0f} GiB)"
            + (f" and {a.tp - 1} more (tensor parallel)" if a.tp > 1 else ""))
-    thinks = kind == "auto_think" and a.precision in ("int8", "bf16", "w4a8", "w4a16")       # thoughts: engine/decode.py, think.py
+    thinks = (kind == "auto_think" and not os.path.isdir(a.gguf)
+              and a.precision in ("int8", "bf16", "w4a8", "w4a16"))  # thoughts: engine/decode.py, think.py
     if thinks:
         from . import think as TH
         auto = TH.folder_auto_think(a.model_dir)
@@ -301,7 +307,9 @@ def main():
                                                   think_seqs=(a.think_seqs or -1) if thinks else 0,
                                                   think_kv_rows=a.think_kv_rows if thinks else 0,
                                                   think_rows_each=max_budget + 1024 if thinks else 0,
-                                                  mmproj=mmproj, tp=a.tp))
+                                                  mmproj=mmproj, tp=a.tp, mxfp4_components=a.mxfp4_components,
+                                                  mxfp4_scaling=a.mxfp4_scaling, mxfp4_rotate=a.mxfp4_rotate,
+                                                  mxfp4_artifact=a.mxfp4_artifact))
     if thinks:                                       # the engine's choice when --think-seqs is 0
         a.think_seqs, a.think_kv_rows = engine.opt.think_seqs, engine.opt.think_kv_rows
     images = I.Settings(max_images=a.max_images, max_pixels=a.max_pixels, refused=text_only)
@@ -347,6 +355,10 @@ def main():
                          "batch_tokens": budget, "kind": kind, "think_mode": defaults.think_mode if thinks else "never",
                          "none_check": none_check, "allow_none": allow_none, "images": engine.vision is not None,
                          "max_images": a.max_images if engine.vision is not None else 0}
+                        | ({"experimental": True, "mxfp4_components": a.mxfp4_components,
+                            "mxfp4_scaling": a.mxfp4_scaling,
+                            "mxfp4_rotate": a.mxfp4_rotate, "offline_artifact": bool(a.mxfp4_artifact),
+                            "weight_source": "original_bf16"} if a.precision == "mxfp4" else {})
                         | ({"max_think_budget": max_budget, "context_length": context, "think_seqs": a.think_seqs,
                             "think_kv_rows": a.think_kv_rows, "gate": defaults.gate} if thinks else {})).encode()
 

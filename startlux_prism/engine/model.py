@@ -141,12 +141,31 @@ class Options:
                                     # started in this process first)
     prompt_attention: str = "auto"  # "causal" or "bidirectional" (the module docstring); "auto": bidirectional for a
                                     # StartLux-Decision v1.1 Instant folder or a GGUF marked non-causal
+    mxfp4_components: str = "all"   # experimental original-BF16 source: "mlp", "gu", "down", or "all"
+    mxfp4_scaling: str = "ceil"     # "ceil" or reconstruction-error-selected "mse" E8M0 scales
+    mxfp4_rotate: bool = True      # paired orthonormal 32-value Hadamard rotation of weights/activations
+    mxfp4_artifact: str = ""       # optional offline projection artifact, checked against original BF16 source
 
 
 class Engine:
     def __init__(self, gguf_path, model_dir, options=None, device="cuda"):
         self.opt = options or Options()
         validate_runtime(self.opt.tp, device=device)
+        self.mxfp4 = self.opt.precision == "mxfp4"
+        if self.mxfp4:
+            if not self.opt.max_tokens:
+                self.opt = dataclasses.replace(self.opt, max_tokens=4096)
+            if self.opt.max_tokens > 16384:
+                raise ValueError("The experimental MXFP4 profile is currently limited to 16,384 packed tokens")
+        self.original_weights = os.path.isdir(gguf_path)
+        self._weight_source_path = gguf_path
+        if self.mxfp4 and (not is_hip() or architecture(device) != "gfx950" or not self.original_weights):
+            raise ValueError("Native MXFP4 requires gfx950 and an original BF16 safetensors directory")
+        if self.original_weights and (self.opt.precision not in ("bf16", "mxfp4") or self.opt.tp != 1
+                                      or self.opt.think_seqs != 0 or self.opt.mmproj):
+            raise ValueError("Original BF16/MXFP4 research currently supports single-GPU text decisions, without decoding")
+        if self.mxfp4 and self.opt.mxfp4_components not in ("mlp", "gu", "down", "all"):
+            raise ValueError("Unknown MXFP4 projection coverage")
         if self.opt.precision == "w4a16" and not is_hip():
             raise ValueError("The experimental W4A16 profile requires ROCm")
         if is_hip():
@@ -171,9 +190,16 @@ class Engine:
             self._tp_id = self.tp.mirror(self, (gguf_path, model_dir, self.opt))   # built on every rank alike
             self.device = self.tp.device
         t0 = time.perf_counter()
-        P.step(f"reading the model file ({os.path.getsize(gguf_path) / 1e9:.1f} GB)")
-        w = gguf_weights.load(gguf_path)
+        P.step(f"reading original BF16 weights from {gguf_path}" if self.original_weights
+               else f"reading the model file ({os.path.getsize(gguf_path) / 1e9:.1f} GB)")
+        if self.original_weights:
+            from ..hf_weights import load
+            w = load(gguf_path)
+        else:
+            w = gguf_weights.load(gguf_path)
         self.cfg = w.config
+        if self.mxfp4 and (self.cfg.hidden, self.cfg.ffn, self.cfg.n_layer) != (5120, 17408, 64):
+            raise ValueError("The experimental MXFP4 model profile is currently qualified only for the 27B layout")
         self.tok = Tokenizer(model_dir)
         mode = self.opt.prompt_attention
         if mode == "auto":
@@ -181,6 +207,8 @@ class Engine:
         if mode not in ("causal", "bidirectional"):
             raise ValueError(f"prompt_attention {self.opt.prompt_attention!r}: causal, bidirectional or auto")
         self.bidir = mode == "bidirectional"
+        if self.mxfp4 and self.bidir:
+            raise ValueError("The experimental MXFP4 model profile currently supports causal AutoThink decisions")
         if is_hip() and architecture(device) == "gfx1201" and self.bidir:
             raise ValueError("The experimental ROCm profile is qualified for causal AutoThink prompts only; "
                              "Instant/bidirectional prompts require separate qualification")
@@ -223,12 +251,14 @@ class Engine:
         if self.opt.precision == "int8" and self.tp is None:
             amax = self._load_or_calibrate(w)
             self._int8_weights(w, amax)
+        elif self.mxfp4:
+            self._mxfp4_weights()
         elif self.opt.precision not in ("bf16", "w4a8", "w4a16", "int8"):
             raise ValueError(f"precision {self.opt.precision!r}")
         del w
         torch.cuda.empty_cache()
         T = self.opt.max_tokens
-        if self.int8 or self.w4 or not T:            # the final buffers: this precision's only, at the chosen size
+        if self.int8 or self.w4 or self.mxfp4 or not T:  # final buffers at the chosen size
             self._free_buffers()
             if self.opt.think_seqs < 0:
                 self._auto_think()
@@ -253,7 +283,9 @@ class Engine:
             return torch.cat([q.to(dev).dequant(bf) for q in qs], 0).contiguous()
 
         self.embed = w.embed.to(dev)
-        if not isinstance(self.embed, gguf_weights.Q8):        # a k-quant file: the embedding kernel reads Q8_0
+        if self.original_weights:
+            self.embed = self.embed.values
+        elif not isinstance(self.embed, gguf_weights.Q8):      # a k-quant file: the embedding kernel reads Q8_0
             self.embed = self.embed.as_q8()
         self.letters = w.output.dequant(torch.float32, torch.tensor(self.tok.letters)).to(dev)  # the readout's rows
         self.out_norm = w.out_norm.to(dev)
@@ -276,6 +308,30 @@ class Engine:
         self.qn = cfg.n_head * cfg.head_dim * 2                       # query|gate rows of the attention projection
         self.inv_freq = (1.0 / (cfg.rope_theta ** (torch.arange(0, cfg.rope_dim, 2, dtype=torch.float64) /
                                                    cfg.rope_dim))).to(torch.float32).to(dev)
+
+    def _mxfp4_weights(self):
+        """Quantize selected original BF16 projections; sensitive state/readout stay unchanged."""
+        from ..kernels import mxfp4 as F
+        coverage = self.opt.mxfp4_components
+        names = {"gu", "down"} if coverage == "mlp" else {coverage}
+        if coverage == "all":
+            names = {"gu", "down", "inp", "out", "qkv", "o"}
+        manifest = None
+        if self.opt.mxfp4_artifact:
+            from .. import mxfp4_artifact as A
+            manifest = A.read_manifest(self.opt.mxfp4_artifact, self._weight_source_path, coverage,
+                                       self.opt.mxfp4_scaling, self.opt.mxfp4_rotate)
+            if len(manifest['layers']) != len(self.layers):
+                raise ValueError('MXFP4 artifact layer count differs from source model')
+        for i, layer in enumerate(self.layers):
+            if manifest:
+                packed = A.load_layer(self.opt.mxfp4_artifact, manifest['layers'][i], self.device)
+                if set(packed) != names & layer.keys() or any(p.shape != tuple(layer[n].shape) for n, p in packed.items()):
+                    raise ValueError(f'MXFP4 artifact projection shapes differ at layer {i}')
+                layer.update(packed)
+                continue
+            for name in names & layer.keys():
+                layer[name] = F.quantize(layer[name], self.opt.mxfp4_scaling, self.opt.mxfp4_rotate)
 
     def _w4_weights(self, w):
         """The W4A8 path's weights (kernels/w4a8.py): every projection repacked from the file's Q4_K / Q6_K blocks, as
@@ -498,6 +554,11 @@ class Engine:
         else:
             buf.update(x=z(T, cfg.hidden, dtype=bf), delta=z(T, cfg.hidden, dtype=bf), act=z(T, cfg.ffn, dtype=bf),
                        xr=z(R, cfg.hidden, dtype=bf), deltar=z(R, cfg.hidden, dtype=bf), actr=z(R, cfg.ffn, dtype=bf))
+            if self.mxfp4:
+                K = max(cfg.ffn, cfg.hidden, cfg.value_dim, cfg.n_head * cfg.head_dim)
+                buf.update(fp4q=z(max(T, R) * K // 2, dtype=torch.uint8),
+                           fp4s=z(max(T, R) * K // 32, dtype=torch.uint8),
+                           fp4sf=z((max(T, R) + 31) // 32, K, dtype=torch.uint8))
         out["buf"] = buf
         # every per-batch table is a view of one flat int32 buffer, so a batch's structure goes to the device in one
         # copy from a pinned staging buffer
@@ -667,6 +728,18 @@ class Engine:
             return mix
 
     # ------------------------------------------------------------------ forward: bf16
+    def _project(self, x, w, out, live):
+        if self.mxfp4:
+            from ..kernels import mxfp4 as F
+            if isinstance(w, F.Packed):
+                m, k = x.shape
+                a = F.Packed(self.buf["fp4q"][:m * k // 2].view(m, k // 2),
+                             self.buf["fp4s"][:m * k // 32].view(m, k // 32),
+                             self.buf["fp4sf"].view(-1)[:((m + 31) // 32) * k].view((m + 31) // 32, k))
+                F.quantize_into(x, a, live, self.opt.mxfp4_scaling, self.opt.mxfp4_rotate)
+                return F.gemm(a, w, out, live)
+        return torch.mm(x, w.t(), out=out)
+
     def _body_bf16(self, T):
         cfg, b, c, L = self.cfg, self.buf, self.cnt, self.layers
         h, x, delta, n = b["h"], b["x"][:T], b["delta"][:T], cfg.n_layer
@@ -677,29 +750,29 @@ class Engine:
             if i in self.gdn_index:
                 self._record((i, "inp"), x, self._n_live)
                 proj = b["proj"][:T, :lw["inp"].shape[0]]
-                torch.mm(x, lw["inp"].t(), out=proj)
+                self._project(x, lw["inp"], proj, c["tok"])
                 self._gdn_core(i, proj, T)
                 mix = b["mix"][:T, :cfg.value_dim]
                 KG.gated_norm(b["o"], proj, cfg.conv_dim, lw["ssm_norm"], mix, c["tok"], T, cfg)
                 self._record((i, "out"), mix, self._n_live)
-                torch.mm(mix, lw["out"].t(), out=delta)
+                self._project(mix, lw["out"], delta, c["tok"])
             else:
                 self._record((i, "qkv"), x, self._n_live)
                 proj = b["proj"][:T, :lw["qkv"].shape[0]]
                 if i == n - 1:                      # last layer: keys and values only; queries run in the head
-                    torch.mm(x, lw["qkv"][self.qn:].t(), out=proj[:, self.qn:])
+                    self._project(x, lw["qkv"][self.qn:], proj[:, self.qn:], c["tok"])
                     self._attn_core(i, proj, T, slots="kv")
                     return
-                torch.mm(x, lw["qkv"].t(), out=proj)
+                self._project(x, lw["qkv"], proj, c["tok"])
                 mix = self._attn_core(i, proj, T)
                 self._record((i, "o"), mix, self._n_live)
-                torch.mm(mix, lw["o"].t(), out=delta)
+                self._project(mix, lw["o"], delta, c["tok"])
             KE.add_norm(h, b["delta"], lw["post_norm"], b["x"], c["tok"], T, cfg.eps)
             self._record((i, "gu"), x, self._n_live)
-            torch.mm(x, lw["gu"].t(), out=b["gu"][:T])
+            self._project(x, lw["gu"], b["gu"][:T], c["tok"])
             KE.swiglu(b["gu"], b["act"], c["tok"], T)
             self._record((i, "down"), b["act"][:T], self._n_live)
-            torch.mm(b["act"][:T], lw["down"].t(), out=delta)
+            self._project(b["act"][:T], lw["down"], delta, c["tok"])
 
     def _head_bf16(self, R):
         cfg, b, t, c = self.cfg, self.buf, self.tab, self.cnt
@@ -708,16 +781,16 @@ class Engine:
         KE.gather_rows(b["x"], t["read"], b["xr"], c["read"], R)
         KE.gather_rows(b["h"], t["read"], b["hr"], c["read"], R)
         qg = b["qgr"][:R]
-        torch.mm(b["xr"][:R], lw["qkv"][:self.qn].t(), out=qg)
+        self._project(b["xr"][:R], lw["qkv"][:self.qn], qg, c["read"])
         self._head_attention(qg, R)
         self._record((i, "o"), b["mixr"][:R], self._r_live)
-        torch.mm(b["mixr"][:R], lw["o"].t(), out=b["deltar"][:R])
+        self._project(b["mixr"][:R], lw["o"], b["deltar"][:R], c["read"])
         KE.add_norm(b["hr"], b["deltar"], lw["post_norm"], b["xr"], c["read"], R, cfg.eps)
         self._record((i, "gu"), b["xr"][:R], self._r_live)
-        torch.mm(b["xr"][:R], lw["gu"].t(), out=b["gur"][:R])
+        self._project(b["xr"][:R], lw["gu"], b["gur"][:R], c["read"])
         KE.swiglu(b["gur"], b["actr"], c["read"], R)
         self._record((i, "down"), b["actr"][:R], self._r_live)
-        torch.mm(b["actr"][:R], lw["down"].t(), out=b["deltar"][:R])
+        self._project(b["actr"][:R], lw["down"], b["deltar"][:R], c["read"])
         self._readout(b["hr"][:R] + b["deltar"][:R].float(), R)
 
     def _head_attention(self, qg, R):

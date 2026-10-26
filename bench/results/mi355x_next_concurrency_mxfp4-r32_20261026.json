@@ -1,0 +1,29 @@
+{
+  "health": {
+    "status": "ok",
+    "model": "StartLux-Decision-v1.1-27B-AutoThink (StartLux-Prism)",
+    "precision": "mxfp4",
+    "tp": 1,
+    "backend": "rocm",
+    "architecture": "gfx950",
+    "graphs": true,
+    "kv_fp8": false,
+    "max_tokens": 4096,
+    "batch_tokens": 4096,
+    "kind": "auto_think",
+    "think_mode": "never",
+    "none_check": true,
+    "allow_none": true,
+    "images": false,
+    "max_images": 0,
+    "experimental": true,
+    "mxfp4_components": "all",
+    "mxfp4_scaling": "ceil",
+    "mxfp4_rotate": true,
+    "offline_artifact": true,
+    "weight_source": "original_bf16"
+  },
+  "clients": 8,
+  "requests": 32,
+  "exact_answers": true
+}

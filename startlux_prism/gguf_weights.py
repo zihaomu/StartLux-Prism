@@ -212,7 +212,7 @@ class Weights:
 
     def to(self, device):
         def mv(x):
-            if isinstance(x, (Q8, KQuant, torch.Tensor)):
+            if isinstance(x, (Q8, KQuant, torch.Tensor)) or (hasattr(x, "dequant") and hasattr(x, "to")):
                 return x.to(device)
             return x
         layers = [Layer(**{f.name: mv(getattr(l, f.name)) for f in dataclasses.fields(Layer)}) for l in self.layers]

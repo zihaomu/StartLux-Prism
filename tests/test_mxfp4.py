@@ -16,7 +16,8 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.bfloat16, torch.float16])
-def test_encoding(dtype):
+@pytest.mark.parametrize('scaling', ['ceil', 'mse'])
+def test_encoding(dtype, scaling):
     g = torch.Generator().manual_seed(71)
     x = torch.randn((5, 256), generator=g) * 2**torch.randint(-12, 12, (5, 8, 1), generator=g).float().expand(-1, -1, 32).flatten(1)
     x[0] = 0
@@ -27,14 +28,15 @@ def test_encoding(dtype):
     x[2, :32] = float('inf')
     x[3, :32] = float('nan')
     x = x.to(dtype)
-    q, s = quantize(x)
-    got = F.quantize(x.cuda())
+    q, s = quantize(x, scaling)
+    got = F.quantize(x.cuda(), scaling)
     assert torch.equal(got.q.cpu(), q)
     assert torch.equal(got.s.cpu(), s)
 
 
 @pytest.mark.parametrize('k', [256, 512, 5120])
-@pytest.mark.parametrize('cfg', [(16, 32, 256, 4, 1), (32, 64, 256, 4, 2), (64, 64, 512, 4, 2)])
+@pytest.mark.parametrize('cfg', [(16, 32, 256, 4, 1), (32, 64, 256, 4, 2), (64, 64, 512, 4, 2),
+                                 (32, 64, 256, 4, 2, 16, 8)])
 def test_product_and_masking(k, cfg):
     g = torch.Generator().manual_seed(k)
     x, w = torch.randn((35, k), generator=g).bfloat16(), torch.randn((33, k), generator=g).bfloat16()
@@ -75,3 +77,12 @@ def test_graph_live_rows():
         if n:
             assert torch.equal(a.q[:n], refa.q) and torch.equal(a.s[:n], refa.s)
         assert torch.all(out[n:] == 42)
+
+
+def test_rotated_quantization():
+    x = torch.randn((8, 256), generator=torch.Generator().manual_seed(71)).bfloat16()
+    for scaling in ('ceil', 'mse'):
+        q, s = quantize(x, scaling, rotate=True)
+        got = F.quantize(x.cuda(), scaling, rotate=True)
+        assert torch.equal(got.q.cpu(), q)
+        assert torch.equal(got.s.cpu(), s)

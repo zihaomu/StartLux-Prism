@@ -1,0 +1,492 @@
+{
+  "mi355x-fp4-aiter": [
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "backend": "triton",
+      "live": 144,
+      "bucket": 192,
+      "copies": 12,
+      "gemm_ms": 0.03782345851262411,
+      "complete_ms": 0.042597646514574684
+    },
+    {
+      "shape": "gdn_in (qkv|z|b|a)",
+      "backend": "gluon",
+      "live": 144,
+      "bucket": 192,
+      "copies": 12,
+      "gemm_ms": 0.30461347103118896,
+      "complete_ms": 0.3088926672935486
+    },
+    {
+      "shape": "gdn_out",
+      "backend": "triton",
+      "live": 144,
+      "bucket": 192,
+      "copies": 33,
+      "gemm_ms": 0.015382817297270803,
+      "complete_ms": 0.020516794739347515
+    },
+    {
+      "shape": "gdn_out",
+      "backend": "gluon",
+      "live": 144,
+      "bucket": 192,
+      "copies": 33,
+      "gemm_ms": 0.3611362919662938,
+      "complete_ms": 0.3693299727006392
+    },
+    {
+      "shape": "mlp_gate_up",
+      "backend": "triton",
+      "live": 144,
+      "bucket": 192,
+      "copies": 6,
+      "gemm_ms": 0.06544024745623271,
+      "complete_ms": 0.0701269159714381
+    },
+    {
+      "shape": "mlp_gate_up",
+      "backend": "gluon",
+      "live": 144,
+      "bucket": 192,
+      "copies": 6,
+      "gemm_ms": 0.3794095516204834,
+      "complete_ms": 0.3837278683980306
+    },
+    {
+      "shape": "mlp_down",
+      "backend": "triton",
+      "live": 144,
+      "bucket": 192,
+      "copies": 12,
+      "gemm_ms": 0.03690679123004278,
+      "complete_ms": 0.04607597986857096
+    },
+    {
+      "shape": "mlp_down",
+      "backend": "gluon",
+      "live": 144,
+      "bucket": 192,
+      "copies": 12,
+      "gemm_ms": 1.0346683661142986,
+      "complete_ms": 1.0460449854532878
+    }
+  ],
+  "mi355x-fp4-aiter-asm": [
+    {
+      "m": 192,
+      "live": 144,
+      "n": 34816,
+      "k": 5120,
+      "copies": 6,
+      "split_k": 0,
+      "max_difference": 0.0,
+      "gemm_ms": 0.04721697668234507,
+      "complete_ms": 0.060411229729652405
+    },
+    {
+      "m": 192,
+      "live": 144,
+      "n": 5120,
+      "k": 17408,
+      "copies": 12,
+      "split_k": 0,
+      "max_difference": 0.0,
+      "gemm_ms": 0.05009825030962626,
+      "complete_ms": 0.06902128954728444
+    }
+  ],
+  "mi355x-fp4-tail": {
+    "gpu": "AMD Instinct MI355X",
+    "torch": "2.14.0+rocm10.1.0",
+    "hip": "7.16.26385",
+    "triton": "3.8.0",
+    "native_fp4": true,
+    "live": 144,
+    "bucket": 192,
+    "source_sha256": "30dd5f447348dff1764e3ea64075449adb70551dd4c3028b7df58b74b927aba9",
+    "projections": [
+      {
+        "shape": "gdn_in (qkv|z|b|a)",
+        "n": 16480,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          128,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 537907200,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[86:89], v[94:97], v[4:7], v71, v72 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.043389146526654564,
+        "complete_ms": 0.047279362877209984,
+        "useful_tflops": 513.9821546054222,
+        "min_weight_tb_s": 0.9481007626185088
+      },
+      {
+        "shape": "gdn_in (qkv|z|b|a)",
+        "n": 16480,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          256,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 537907200,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[124:127], v[144:147], v[4:7], v90, v149 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.039701834321022034,
+        "complete_ms": 0.04428809384504954,
+        "useful_tflops": 548.6971032219375,
+        "min_weight_tb_s": 1.0121365836342162
+      },
+      {
+        "shape": "gdn_in (qkv|z|b|a)",
+        "n": 16480,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          256,
+          8,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 537907200,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[16:19], v[120:123], v[108:111], v[16:19], v104, v105 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.05946898957093557,
+        "complete_ms": 0.06610943873723348,
+        "useful_tflops": 367.5836501439481,
+        "min_weight_tb_s": 0.6780514379825432
+      },
+      {
+        "shape": "gdn_in (qkv|z|b|a)",
+        "n": 16480,
+        "k": 5120,
+        "config": [
+          128,
+          128,
+          128,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 537907200,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[8:11], v[130:133], v[146:149], v[8:11], v113, v116 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.043767258524894714,
+        "complete_ms": 0.048421854774157204,
+        "useful_tflops": 501.854976711246,
+        "min_weight_tb_s": 0.9257307513119772
+      },
+      {
+        "shape": "gdn_in (qkv|z|b|a)",
+        "n": 16480,
+        "k": 5120,
+        "config": [
+          128,
+          128,
+          256,
+          8,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 537907200,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[28:31], v[100:103], v[116:119], v[28:31], v83, v86 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.03673181186119715,
+        "complete_ms": 0.04126391559839249,
+        "useful_tflops": 588.9103941688627,
+        "min_weight_tb_s": 1.0863147461882232
+      },
+      {
+        "shape": "gdn_out",
+        "n": 5120,
+        "k": 6144,
+        "config": [
+          128,
+          64,
+          128,
+          4,
+          2
+        ],
+        "copies": 33,
+        "streaming_weight_bytes": 551485440,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[86:89], v[94:97], v[4:7], v71, v72 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.03926873207092285,
+        "complete_ms": 0.04556488268303149,
+        "useful_tflops": 198.83068070257232,
+        "min_weight_tb_s": 0.3667666636223665
+      },
+      {
+        "shape": "gdn_out",
+        "n": 5120,
+        "k": 6144,
+        "config": [
+          128,
+          64,
+          256,
+          4,
+          2
+        ],
+        "copies": 33,
+        "streaming_weight_bytes": 551485440,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[124:127], v[144:147], v[4:7], v87, v148 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.032368920066139915,
+        "complete_ms": 0.0381877241712628,
+        "useful_tflops": 237.2410725333992,
+        "min_weight_tb_s": 0.43761916591447336
+      },
+      {
+        "shape": "gdn_out",
+        "n": 5120,
+        "k": 6144,
+        "config": [
+          128,
+          64,
+          256,
+          8,
+          2
+        ],
+        "copies": 33,
+        "streaming_weight_bytes": 551485440,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[16:19], v[120:123], v[108:111], v[16:19], v104, v105 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.035282868327516495,
+        "complete_ms": 0.04092895623409387,
+        "useful_tflops": 221.3517634845831,
+        "min_weight_tb_s": 0.4083094595527249
+      },
+      {
+        "shape": "gdn_out",
+        "n": 5120,
+        "k": 6144,
+        "config": [
+          128,
+          128,
+          128,
+          4,
+          2
+        ],
+        "copies": 33,
+        "streaming_weight_bytes": 551485440,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[8:11], v[128:131], v[144:147], v[8:11], v111, v114 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.05095353271021987,
+        "complete_ms": 0.06104812477574204,
+        "useful_tflops": 148.40253772381135,
+        "min_weight_tb_s": 0.2737460005756069
+      },
+      {
+        "shape": "gdn_out",
+        "n": 5120,
+        "k": 6144,
+        "config": [
+          128,
+          128,
+          256,
+          8,
+          2
+        ],
+        "copies": 33,
+        "streaming_weight_bytes": 551485440,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[28:31], v[108:111], v[116:119], v[28:31], v77, v97 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.044166391546075996,
+        "complete_ms": 0.05002247203480114,
+        "useful_tflops": 181.11253345690469,
+        "min_weight_tb_s": 0.334083449302016
+      },
+      {
+        "shape": "mlp_gate_up",
+        "n": 34816,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          128,
+          4,
+          2
+        ],
+        "copies": 6,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[86:89], v[94:97], v[4:7], v71, v72 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.0704094370206197,
+        "complete_ms": 0.07436862587928772,
+        "useful_tflops": 690.321763418492,
+        "min_weight_tb_s": 1.273379988944701
+      },
+      {
+        "shape": "mlp_gate_up",
+        "n": 34816,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          256,
+          4,
+          2
+        ],
+        "copies": 6,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[124:127], v[144:147], v[4:7], v87, v148 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.06442526976267497,
+        "complete_ms": 0.06889776885509491,
+        "useful_tflops": 745.1370605044432,
+        "min_weight_tb_s": 1.3744932756700885
+      },
+      {
+        "shape": "mlp_gate_up",
+        "n": 34816,
+        "k": 5120,
+        "config": [
+          128,
+          64,
+          256,
+          8,
+          2
+        ],
+        "copies": 6,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[16:19], v[120:123], v[108:111], v[16:19], v104, v105 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.08920704325040181,
+        "complete_ms": 0.09438120325406392,
+        "useful_tflops": 543.9460315186165,
+        "min_weight_tb_s": 1.0033726709870312
+      },
+      {
+        "shape": "mlp_gate_up",
+        "n": 34816,
+        "k": 5120,
+        "config": [
+          128,
+          128,
+          128,
+          4,
+          2
+        ],
+        "copies": 6,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[8:11], v[128:131], v[144:147], v[8:11], v111, v114 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.07097195585568745,
+        "complete_ms": 0.07507029175758362,
+        "useful_tflops": 683.8694743025799,
+        "min_weight_tb_s": 1.2614779799418248
+      },
+      {
+        "shape": "mlp_gate_up",
+        "n": 34816,
+        "k": 5120,
+        "config": [
+          128,
+          128,
+          256,
+          8,
+          2
+        ],
+        "copies": 6,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[28:31], v[108:111], v[116:119], v[28:31], v77, v97 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.07732447981834412,
+        "complete_ms": 0.08212949832280476,
+        "useful_tflops": 625.0894259480091,
+        "min_weight_tb_s": 1.153051241440555
+      },
+      {
+        "shape": "mlp_down",
+        "n": 5120,
+        "k": 17408,
+        "config": [
+          128,
+          64,
+          128,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[86:89], v[94:97], v[4:7], v71, v72 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.10377094149589539,
+        "complete_ms": 0.11430295308430989,
+        "useful_tflops": 224.57110500956554,
+        "min_weight_tb_s": 0.41424791505670727
+      },
+      {
+        "shape": "mlp_down",
+        "n": 5120,
+        "k": 17408,
+        "config": [
+          128,
+          64,
+          256,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[4:7], v[124:127], v[144:147], v[4:7], v87, v148 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.08759951591491699,
+        "complete_ms": 0.09799331426620483,
+        "useful_tflops": 261.9478754465658,
+        "min_weight_tb_s": 0.483193780663153
+      },
+      {
+        "shape": "mlp_down",
+        "n": 5120,
+        "k": 17408,
+        "config": [
+          128,
+          64,
+          256,
+          8,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[16:19], v[120:123], v[108:111], v[16:19], v104, v105 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.096955806016922,
+        "complete_ms": 0.10717293620109558,
+        "useful_tflops": 239.51140455679328,
+        "min_weight_tb_s": 0.44180706135693204
+      },
+      {
+        "shape": "mlp_down",
+        "n": 5120,
+        "k": 17408,
+        "config": [
+          128,
+          128,
+          128,
+          4,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[8:11], v[128:131], v[144:147], v[8:11], v111, v114 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.14859309792518616,
+        "complete_ms": 0.15906148155530295,
+        "useful_tflops": 161.3787337387228,
+        "min_weight_tb_s": 0.29768212603714056
+      },
+      {
+        "shape": "mlp_down",
+        "n": 5120,
+        "k": 17408,
+        "config": [
+          128,
+          128,
+          256,
+          8,
+          2
+        ],
+        "copies": 12,
+        "streaming_weight_bytes": 568197120,
+        "native_instruction": "v_mfma_scale_f32_16x16x128_f8f6f4 v[28:31], v[108:111], v[116:119], v[28:31], v77, v97 op_sel_hi:[0,0,0] cbsz:4 blgp:4",
+        "gemm_ms": 0.11704838275909424,
+        "complete_ms": 0.1273434261480967,
+        "useful_tflops": 201.5741311227761,
+        "min_weight_tb_s": 0.3718272818019958
+      }
+    ]
+  }
+}

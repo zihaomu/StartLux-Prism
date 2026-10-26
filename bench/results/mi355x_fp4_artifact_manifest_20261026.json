@@ -1,0 +1,1543 @@
+{
+  "version": 1,
+  "layout": "e2m1-adjacent-k/e8m0-per-32-k",
+  "components": "all",
+  "scaling": "ceil",
+  "rotate": true,
+  "quantizer_sha256": "c070b517f699f8cd30c478e30bba891d4eac7bdb2424f80e53e5c104a3d3cbea",
+  "source_config_sha256": "effbfe91edcf6af4a97d7621e6424d73f8b7510119a3de1fae53d7cee3a0ddbf",
+  "source_index_sha256": "ea0c86ffffe0a8dab85abfa5938c93e3c3ef52088bcefbcf8c4e8ee304be2f2a",
+  "source": "original BF16 safetensors; no GGUF requantization",
+  "layers": [
+    {
+      "file": "layer-000.safetensors",
+      "sha256": "3d7c6f1de0cbf0900cb197ebd411b7be86d7964a4705cf569e665ca384bf1d8c",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-001.safetensors",
+      "sha256": "2c015e9e8f1b69617085e736b1198c39dabc50f9ee2692ad63c6ae9b5d34f478",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-002.safetensors",
+      "sha256": "a396f73ba01e7444ffb27e248d21172c19ec57b2c4c80ead71bacf6e05f0fb21",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-003.safetensors",
+      "sha256": "cc7737ed1a0a062939ecc2cc6112b9020d95e3078cf78d65596ae66c55b31cd9",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-004.safetensors",
+      "sha256": "e66265fd436c336371e6c3a868100c7cb70d12b88f20b87a1849536e8b4f8b53",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-005.safetensors",
+      "sha256": "125fc2d6698436acb23afaec6ecff75b12394998b2c44c65d0c3ab55f6b320ff",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-006.safetensors",
+      "sha256": "f1884240de39e559923ce5012ad341ea39e92354a0b27b6a1aed2663fd6d7f3d",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-007.safetensors",
+      "sha256": "e5c3c3af34612ff8883c85a508fd55bb9d42a4ca3c5a8a7a8c4ddd64777497c2",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-008.safetensors",
+      "sha256": "be0cee6035a374ee02d6d9a5273d043aafe2b5eea001f9b337cdfc048db6dc6c",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-009.safetensors",
+      "sha256": "af946b0aa85cab7601f02e9c317c961f423f9ef0092fdae0037818967ecb47a4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-010.safetensors",
+      "sha256": "bcd3997fa5c8622a6821cf823b43a7e3a375237b3eaad382ddc5a8520501ffe4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-011.safetensors",
+      "sha256": "3a79ee1b3ff1b04c2e1c712b04ea549e208c294e77ee4cbfb23dcf73a6a67e9b",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-012.safetensors",
+      "sha256": "8fff93bcedfe59955d61ad06df8b409ddcca86ede26410f357423a5b4b749667",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-013.safetensors",
+      "sha256": "4a154bd6d00e5810bc64e042dbac88444231b68c33eea3df082ff6936eee2ef4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-014.safetensors",
+      "sha256": "332f3c95ea9ba5f9fbf57bb6c05606ab517a80c5c47f12a8db0dc587ca918b92",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-015.safetensors",
+      "sha256": "81a269855f5445411711d8d278e2bb0d2c89d27f7022a7e93c1cbd5928939bb5",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-016.safetensors",
+      "sha256": "6f657c7a8e00cd346e3c317479ffb7996ec274fc6f3f11678ab3afd94d0221d8",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-017.safetensors",
+      "sha256": "3584022cfdbd3a2528987fb8806079e23d0aa9dd2d67cb07de893901a2f8ffe4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-018.safetensors",
+      "sha256": "913a1b3768a15ebd525c627d0f7da9d249a9a7702e11069389052a0661d7ceb3",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-019.safetensors",
+      "sha256": "fb3968eeeda7eedea60e2cd403c5b0a62c4f160e4b035263e75fb1ff7c0a2101",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-020.safetensors",
+      "sha256": "ea236fddce9c297d49c69faa033e1889b284b12459a3f9a01e63596c49e2d5db",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-021.safetensors",
+      "sha256": "b1316b87b7660fd7f1590b860256e492150a385037dddff65bb311c482ffffd5",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-022.safetensors",
+      "sha256": "39f28656339e9625807915e403653e2f784bd47eaafe9533909f40d6a4ae8de8",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-023.safetensors",
+      "sha256": "ddd5d969647127bcc88d205506e9dd94c81e0d1be913808f2c9152ec18550103",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-024.safetensors",
+      "sha256": "a7ae29b4311b0d7cc4edac5ffed101dbc0d0c4091f19493cf36e66473cdcd890",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-025.safetensors",
+      "sha256": "db90b249f24c3398c28004929aa6b59a8aba732e19235bf421b24b20da3ed9f1",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-026.safetensors",
+      "sha256": "6ccba17c3e71a47789a22c02215bc28909ad9cc7ca1bee158161c5f9cbb86c3f",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-027.safetensors",
+      "sha256": "beabfc92b9f45dd435f318c23eccdd5cf9dca63d395661af71ba3804de009d47",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-028.safetensors",
+      "sha256": "574556d83f3ab1a91b829773df9da26c8e75645f61802bb5b5ce97e0836f2455",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-029.safetensors",
+      "sha256": "6122ff18a2836b22bc033bf88e4384f614844de246f161fdf07c95db2fae5f92",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-030.safetensors",
+      "sha256": "41e9e7d84ae43f038ce3b3755616bd0e5692c9e2786e1a339409c5ebc5008740",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-031.safetensors",
+      "sha256": "2d0beea8b540ca48a814cda1b35c7ca0ef95919263c2830412394ff032f6bcc7",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-032.safetensors",
+      "sha256": "c6e0e655e3b099b2457235f0139a2f51cb26dc0de9852a1f725b7f5679518f8f",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-033.safetensors",
+      "sha256": "47f097bf4a46e137e627ab58a6d72587c2c1aea1b28bf22555f92192fea28680",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-034.safetensors",
+      "sha256": "072f4fc14f4c9449bb73c0bee0573d18378dfcf6b3d4ee4d97b4d22917be4f4d",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-035.safetensors",
+      "sha256": "5f6161efb0576d60f3a78fdf9835cb3d2e2265889a720d3238c90b7f8f8b41c2",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-036.safetensors",
+      "sha256": "e02925f59da5d1539b6d5d6d836c721971c0dbb322eca4b7b4674a3a865bb8a6",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-037.safetensors",
+      "sha256": "aac74cda3f77412c2a546b76df9212802af151961ffba0124ebf60c69d778a5d",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-038.safetensors",
+      "sha256": "0f5b852096c13bdedd14dd366faddd9ee40f1efe587c5709e8fc99c79b4746f2",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-039.safetensors",
+      "sha256": "9ca5d01ca163ab83dc340ada4d2bd4fe3efcb6ea862395d9c7b6e9418a74fb8c",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-040.safetensors",
+      "sha256": "d30c59eb151b38413330e05ca6c74b5b148039e4faef1ac9a4e75e0e9a4d8f68",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-041.safetensors",
+      "sha256": "e734d659ceeac9cae104a499a6709643b17fa5601af47ca3be3cfe3e2908e915",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-042.safetensors",
+      "sha256": "97b658048983cfaa981c49676e02cf32936c3189b69272d4343719f5b8a7d18b",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-043.safetensors",
+      "sha256": "591ae1410d99e8027917b0359ad51b7748fd63672ef7ae27ab903b03b545be82",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-044.safetensors",
+      "sha256": "c030397337d8aee4eee36a5e49c2ee474546de1f76a68512e3e6f1fd12409135",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-045.safetensors",
+      "sha256": "3df95cf3f7ec71e8879d5d6e70685b2f03614aa250d1c5d342104f1716300b49",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-046.safetensors",
+      "sha256": "66715688bdaab185e3a69380968830e9967445c1a1349dbc8f269490d042c61d",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-047.safetensors",
+      "sha256": "087ee3f6e4e7d8eb01c89f0b570d77508717e2a7674e01c05b05748b0e32d9a8",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-048.safetensors",
+      "sha256": "e9c3c478660bb4c0e3fd6c3735e7c9acfaeb7c689de0f50f64cf4b02c4a058e4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-049.safetensors",
+      "sha256": "7643a8704d8c221cae283bb59e1bb613b8cb779780b23366528d1d6ec7103ed9",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-050.safetensors",
+      "sha256": "aa82dd8c6938d30776ee21a0547eabccef8f45d33cd994ff298958376a5b3c50",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-051.safetensors",
+      "sha256": "aec84c2ff956f7fc154c76068561efd3c55628d2c5556e04aea33dcf82582531",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-052.safetensors",
+      "sha256": "8a0faf5c30fe4ab341f12e736409009c3ba2b716fae327f93d86a70f7a6290f8",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-053.safetensors",
+      "sha256": "3d8c27a6a3b4fe30ab2bb22cb513707044c0aaeef3281a0b8de47ad5b19c0bcf",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-054.safetensors",
+      "sha256": "2dd4d54b77550b4156c6f63e689faaa1f33fe40c4fcfa6c647f9bf810b80d7e4",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-055.safetensors",
+      "sha256": "483ac44718d7cca5b52675723f9e1a293c2466f8e5a0b6779206a2b88b3df5e2",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-056.safetensors",
+      "sha256": "b41882a20ab4afab9e7ff70f3f5da727006e7e61bc7be76ca8da5bc705fbe7b1",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-057.safetensors",
+      "sha256": "1774f43d01bc4eef18eaa8c91d4192fb9480ff5664ea286da3142bab44c5dbbb",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-058.safetensors",
+      "sha256": "abcbcff0969ed2a4b1b256718818cb1a741819ffe52a150caf1c28617304d54b",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-059.safetensors",
+      "sha256": "5f7a4a88486a39f9407bb3ef79197b74ecd3a9cdf49181579cea2fb14491c6cd",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    },
+    {
+      "file": "layer-060.safetensors",
+      "sha256": "bb18270844a8bb830fedc8606eb4b6e040246a8d62c58861a656627c68c6ac99",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-061.safetensors",
+      "sha256": "15bbe189cea7fc6401bb1ec74a13f7e8b924b421ab955adc998ff4731b107eb0",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-062.safetensors",
+      "sha256": "e04cbdc23b79e3d10295f3015f5dc2caf57c66a08460bf15ac9e676a8a485742",
+      "bytes": 203587200,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "inp": [
+          16480,
+          5120
+        ],
+        "out": [
+          5120,
+          6144
+        ]
+      }
+    },
+    {
+      "file": "layer-063.safetensors",
+      "sha256": "1867346843c55631374e353807a1f8695e0849c8e71531c356098030f32f514c",
+      "bytes": 197755520,
+      "shapes": {
+        "down": [
+          5120,
+          17408
+        ],
+        "gu": [
+          34816,
+          5120
+        ],
+        "o": [
+          5120,
+          6144
+        ],
+        "qkv": [
+          14336,
+          5120
+        ]
+      }
+    }
+  ],
+  "source_shards": {
+    "model-00001.safetensors": {
+      "sha256": "0d33f3508c516750f5abf7a76312462e43de38141d99f22c45e2f12914e51c42",
+      "bytes": 5085593848
+    },
+    "model-00002.safetensors": {
+      "sha256": "89f78267c15e024d77b92079a75b7d1777a1f0a5e4b4b19f739fcf55f21caf29",
+      "bytes": 4042468368
+    },
+    "model-00003.safetensors": {
+      "sha256": "b2bfda14840e9a39ef3f105536b3ac4571920dc252d2cd82d4d1e62a49e27dcc",
+      "bytes": 4167220864
+    },
+    "model-00004.safetensors": {
+      "sha256": "540918f0e5a52fcdc5a62a9a9dc91fa456145ecf85a19d15f590f277c71c65f8",
+      "bytes": 4167241584
+    },
+    "model-00005.safetensors": {
+      "sha256": "6a5cfcd876421da27324fc6ac78250890b9a7ca71980ce34d4bda9cdb2281e53",
+      "bytes": 4020421768
+    },
+    "model-00006.safetensors": {
+      "sha256": "5a4d340dd73ab41b93b2feb241b386aa48422f9178fef06278044d0708322172",
+      "bytes": 4145184544
+    },
+    "model-00007.safetensors": {
+      "sha256": "46679084542a902dab2d43165e596500f5bfa8f51455815169c47bd2b9ccf687",
+      "bytes": 4042478760
+    },
+    "model-00008.safetensors": {
+      "sha256": "f8e82a97d393c4bb94f53da489b712b9a25c3828f7f644d1c56190e3719380c9",
+      "bytes": 4167220872
+    },
+    "model-00009.safetensors": {
+      "sha256": "1a8abe510f19f80bea634326ded56687215c1a79a78b75dbb114f9736c353b43",
+      "bytes": 4072870784
+    },
+    "model-00010.safetensors": {
+      "sha256": "24c1e4ddfac5cef3db8b92fc491c67367f76b881a3d7543a5b7fbb60de5e823c",
+      "bytes": 4114792576
+    },
+    "model-00011.safetensors": {
+      "sha256": "912411099cb3b0a89661b8daf22f59e8daf7755fbd707fd43639ebed2da7966a",
+      "bytes": 4167220864
+    },
+    "model-00012.safetensors": {
+      "sha256": "6f3814d7469f8f78681bc67a7c253bb786ea012c47a0bb50dbc07fcb508002a6",
+      "bytes": 4042478768
+    },
+    "model-00013.safetensors": {
+      "sha256": "d8a756d8fc3b2544f22825ce5e8689d72e98e96c9e23a2fe48d4adb152118bb0",
+      "bytes": 4004192056
+    },
+    "model-00014.safetensors": {
+      "sha256": "23a3e3b8d03a0af9f89cc8b0d3d56e58d54cf01ba5dda81bf0c178a90aa135f0",
+      "bytes": 474220608
+    }
+  }
+}

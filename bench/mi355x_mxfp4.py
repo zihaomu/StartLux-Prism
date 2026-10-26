@@ -19,6 +19,7 @@ def main():
     p.add_argument('--out', required=True)
     p.add_argument('--live', type=int, default=144)
     p.add_argument('--bucket', type=int, default=192)
+    p.add_argument('--rotate', action='store_true')
     p.add_argument('--shapes', default='mlp_gate_up,mlp_down,gdn_in,gdn_out')
     p.add_argument('--configs', default='32,128,256,4,2;64,128,256,4,2;64,128,512,4,2;64,256,256,8,2;128,128,256,4,2;32,128,512,4,2')
     args = p.parse_args()
@@ -26,7 +27,7 @@ def main():
     path.parent.mkdir(parents=True, exist_ok=True)
     report = dict(gpu=torch.cuda.get_device_name(), torch=torch.__version__, hip=torch.version.hip,
                   triton=triton.__version__, native_fp4=True, live=args.live, bucket=args.bucket,
-                  source_sha256=hashlib.sha256(F._gemm.src.encode()).hexdigest(), projections=[])
+                  source_sha256=F.kernel_identity(), projections=[])
     torch.manual_seed(20261026)
     for name, (n, k) in model_shapes(hidden=5120, ffn=17408, v_heads=48, n_head=24).items():
         if name.split()[0] not in args.shapes.split(','):
@@ -34,9 +35,9 @@ def main():
         x = torch.randn((args.bucket, k), device='cuda', dtype=torch.bfloat16)
         a, live = F.empty(args.bucket, k, 'cuda'), torch.tensor(args.live, device='cuda', dtype=torch.int32)
         copies = max(4, math.ceil(2 * 256 * 1024**2 / (n * k * 17 / 32)))
-        weights = [F.quantize(torch.randn((n, k), device='cuda', dtype=torch.bfloat16)) for _ in range(copies)]
+        weights = [F.quantize(torch.randn((n, k), device='cuda', dtype=torch.bfloat16), rotate=args.rotate) for _ in range(copies)]
         y = torch.empty((args.bucket, n), device='cuda', dtype=torch.bfloat16)
-        F.quantize_into(x, a, live)
+        F.quantize_into(x, a, live, rotate=args.rotate)
         for raw in args.configs.split(';'):
             cfg = tuple(map(int, raw.split(',')))
             row = dict(shape=name, n=n, k=k, config=cfg, copies=copies,
@@ -46,7 +47,7 @@ def main():
                     F.gemm(a, w, y, live, cfg)
             def complete():
                 for w in weights:
-                    F.quantize_into(x, a, live)
+                    F.quantize_into(x, a, live, rotate=args.rotate)
                     F.gemm(a, w, y, live, cfg)
             try:
                 program = F.gemm(a, weights[0], y, live, cfg)
