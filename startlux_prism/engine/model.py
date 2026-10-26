@@ -41,7 +41,7 @@ import torch
 
 from .. import gguf_weights, jevfmt as J
 from .. import progress as P
-from ..backends import architecture, is_hip, require_single_gpu
+from ..backends import architecture, is_hip, supports_kv_fp8, validate_runtime
 from ..kernels import attn as KA
 from ..kernels import cuda_ext as CX
 from ..kernels import elementwise as KE
@@ -146,17 +146,19 @@ class Options:
 class Engine:
     def __init__(self, gguf_path, model_dir, options=None, device="cuda"):
         self.opt = options or Options()
-        require_single_gpu(self.opt.tp)
+        validate_runtime(self.opt.tp, device=device)
         if self.opt.precision == "w4a16" and not is_hip():
-            raise ValueError("The experimental W4A16 profile requires ROCm gfx1201")
+            raise ValueError("The experimental W4A16 profile requires ROCm")
         if is_hip():
-            if architecture() != "gfx1201":
-                raise ValueError("The experimental ROCm model profile is currently limited to gfx1201")
-            if self.opt.precision not in ("w4a8", "w4a16"):
+            if architecture(device) == "gfx1201" and self.opt.precision not in ("w4a8", "w4a16"):
                 raise ValueError("The current ROCm model paths use Q4_K_M as w4a8 or w4a16; "
                                  "bf16/int8 whole-model paths are not qualified on this single-GPU profile")
             self.opt.pdl = 0
             self.opt.l2_prefetch = 0
+        if self.opt.kv_fp8 and not supports_kv_fp8(device):
+            raise ValueError("FP8 KV cache requires gfx950 or NVIDIA sm_89 or newer")
+        if self.opt.kv_fp8 and self.opt.attn_qk8:
+            raise ValueError("FP8 KV cache and int8 attention keys are mutually exclusive")
         self.device = torch.device(device)
         self.tp = None                               # tensor parallelism (startlux_prism/tp.py): this rank's group
         if self.opt.tp > 1:
@@ -179,7 +181,7 @@ class Engine:
         if mode not in ("causal", "bidirectional"):
             raise ValueError(f"prompt_attention {self.opt.prompt_attention!r}: causal, bidirectional or auto")
         self.bidir = mode == "bidirectional"
-        if is_hip() and self.bidir:
+        if is_hip() and architecture(device) == "gfx1201" and self.bidir:
             raise ValueError("The experimental ROCm profile is qualified for causal AutoThink prompts only; "
                              "Instant/bidirectional prompts require separate qualification")
         if self.bidir:                               # every prompt whole: nothing to share or cache
@@ -1040,9 +1042,13 @@ class Engine:
                 raise
             b.images = feats[2]
         self.tp.run(self, b.slot, b.T, b.R, n, 0 if feats is None else len(feats[0]))
+        if self._timed_events is not None:
+            self._timed_events[b.slot][0].record()
         self._pass(b.slot, b.T, b.R, n, feats)
         n = b.plan.counts["read"]
         self._logits_host[b.slot][:n].copy_(self.buf["logits"][:n], non_blocking=True)
+        if self._timed_events is not None:
+            self._timed_events[b.slot][1].record()
         self._done[b.slot].record()
         return b
 
@@ -1075,6 +1081,7 @@ class Engine:
             self._graph("head", R).replay()
         else:
             self._head(R)
+        self.tp.end()
 
     def _encode_images(self, feats):
         """Rank 0: a batch's image rows as vision.write writes them -> (their packed rows, int64; their features, fp32
@@ -1138,6 +1145,8 @@ class Engine:
         This creates no graphs and performs no online autotuning. A saved live-count
         table is restored even if compilation fails, so warm-up is safe after load.
         """
+        if self.tp is not None:
+            self.tp.call(self, "warm_up_eager", buckets, reads)
         bodies = buckets or [x for x in TOKEN_BUCKETS if x <= self.max_tokens]
         heads = reads or [x for x in READ_BUCKETS if x <= self.opt.max_read]
         saved = self.counts.clone()

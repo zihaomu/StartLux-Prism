@@ -49,7 +49,7 @@ import torch
 
 from . import images as I
 from . import progress as P
-from .backends import architecture, is_hip, require_single_gpu
+from .backends import architecture, is_hip, supports_kv_fp8, validate_runtime
 from .decide import Decider, request_controls
 from .engine.model import Engine, Options, group
 from .httpserve import serve
@@ -246,7 +246,8 @@ def main():
                          "lower latency (startlux_prism/tp.py)")
     ap.add_argument("--gpus", default="", help="with --tp: the GPUs, e.g. 4,5 (default: the visible ones)")
     a = ap.parse_args()
-    require_single_gpu(a.tp, a.gpus)
+    if a.tp == 1:
+        validate_runtime(a.tp, a.gpus)
     t_start = time.perf_counter()
     P.on()                                           # start-up progress on stdout (progress.py)
     from .vision import find_mmproj, is_mmproj
@@ -278,9 +279,8 @@ def main():
     kind = folder_kind(a.model_dir, GGUFFile(a.gguf).meta)
     sys.setswitchinterval(a.switch_interval)
     gpu = torch.cuda.get_device_properties(0)
-    if a.kv_fp8 and (gpu.major, gpu.minor) < (8, 9):
-        sys.exit(f"--kv-fp8 keeps keys and values as e4m3, which needs sm_89 or newer (Ada, Hopper, Blackwell), not "
-                 f"sm_{gpu.major}{gpu.minor}")
+    if a.kv_fp8 and not supports_kv_fp8():
+        sys.exit(f"--kv-fp8 requires gfx950 or NVIDIA sm_89 or newer, not {architecture()}")
     label = {"auto_think": "v1.1 AutoThink", "instant": "v1.1 Instant, prompt read bidirectionally"}.get(kind, kind)
     P.step(f"StartLux-Prism: {os.path.basename(a.gguf)} ({label}) as "
            f"{a.precision} on {gpu.name} ({architecture()}, {gpu.total_memory / 2**30:.0f} GiB)"
@@ -342,6 +342,7 @@ def main():
     health = json.dumps({"status": "ok", "model": a.name, "precision": a.precision, "tp": a.tp,
                          "backend": "rocm" if is_hip() else "cuda", "architecture": architecture(),
                          "graphs": not a.no_graphs,
+                         "kv_fp8": a.kv_fp8,
                          "max_tokens": engine.max_tokens,
                          "batch_tokens": budget, "kind": kind, "think_mode": defaults.think_mode if thinks else "never",
                          "none_check": none_check, "allow_none": allow_none, "images": engine.vision is not None,

@@ -1,4 +1,4 @@
-"""Real compressed 27B multimodal eager/graph/cache and semantic smoke checks."""
+"""Real compressed model multimodal eager/graph/cache and semantic smoke checks."""
 
 import os
 import argparse
@@ -121,13 +121,14 @@ def main():
         peak_reserved=torch.cuda.max_memory_reserved(),
         free_total=torch.cuda.mem_get_info(),
     )
+    Path(a.output).parent.mkdir(parents=True, exist_ok=True)
     Path(a.output).write_text(json.dumps(result, indent=2) + "\n")
     assert result["right"] >= 0.9 * result["total"], (
         "vision semantic smoke below 90%",
         result["right"],
         result["total"],
     )
-    print("PASS 27B vision qualification", result["right"], "/", result["total"], flush=True)
+    print("PASS vision qualification", os.path.basename(a.gguf), result["right"], "/", result["total"], flush=True)
 
 
 if __name__ == "__main__":

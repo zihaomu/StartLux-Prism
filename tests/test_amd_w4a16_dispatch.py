@@ -10,8 +10,8 @@ from startlux_prism.kernels import amd_w4a16_dispatch as D
 
 
 def test_w4a16_rejects_non_rocm_before_loading_weights():
-    with patch.object(M, 'is_hip', return_value=False), patch.object(M, 'require_single_gpu'):
-        with pytest.raises(ValueError, match='requires ROCm gfx1201'):
+    with patch.object(M, 'is_hip', return_value=False), patch.object(M, 'validate_runtime'):
+        with pytest.raises(ValueError, match='requires ROCm'):
             M.Engine('must-not-open.gguf', 'must-not-open', M.Options(precision='w4a16'))
 
 

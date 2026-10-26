@@ -38,6 +38,7 @@ from ..backends import is_hip
 # STARTLUX_PRISM_ATTN_<NAME> overrides.
 LAUNCH = dict(BM=32, BN=32, WARPS=4, STAGES=3)
 LAUNCH_BY_GPU = {"h200": dict(BM=128, BN=64, WARPS=8, STAGES=2),
+                 "gfx950": dict(BM=32, BN=32, WARPS=4, STAGES=1),
                  "gfx1201": dict(BM=16, BN=32, WARPS=4, STAGES=1)}
 
 
@@ -137,7 +138,7 @@ def _attend_range(acc, m_i, l_i, q, kv_ptr, k_base, v_base, kv8s_ptr, k8s_base, 
             kq = tl.load(kv_ptr + k_base + (start + kb + n)[:, None] * HD + d[None, :], mask=km[:, None], other=0)
             kf = kq.to(tl.float8e4nv, bitcast=True).to(tl.float32)
             ks = tl.load(kv8s_ptr + k8s_base + start + kb + n, mask=km, other=0.0)
-            k = (kf * ks[:, None]).to(tl.bfloat16)
+            k = (kf * ks[:, None]).to(q.dtype)
         else:
             k = tl.load(kv_ptr + k_base + (start + kb + n)[:, None] * HD + d[None, :], mask=km[:, None], other=0.0)
         s = tl.dot(q, tl.trans(k)) * SCALE
@@ -154,7 +155,7 @@ def _attend_range(acc, m_i, l_i, q, kv_ptr, k_base, v_base, kv8s_ptr, k8s_base, 
             vq = tl.load(kv_ptr + v_base + (start + kb + n)[:, None] * HD + d[None, :], mask=km[:, None], other=0)
             vf = vq.to(tl.float8e4nv, bitcast=True).to(tl.float32)
             vs = tl.load(kv8s_ptr + v8s_base + start + kb + n, mask=km, other=0.0)
-            v = (vf * vs[:, None]).to(tl.bfloat16)
+            v = (vf * vs[:, None]).to(q.dtype)
         else:
             v = tl.load(kv_ptr + v_base + (start + kb + n)[:, None] * HD + d[None, :], mask=km[:, None], other=0.0)
         acc = acc * alpha[:, None] + tl.dot(p.to(v.dtype), v)

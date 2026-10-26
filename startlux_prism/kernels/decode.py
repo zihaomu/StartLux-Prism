@@ -240,7 +240,7 @@ def _attn_part_kernel(q_ptr, kv_ptr, k_base0, kind_stride, head_stride, kv8s_ptr
                 kq = tl.load(kv_ptr + k_base + rows[:, None] * HD + d[None, :], mask=km[:, None], other=0)
                 kf = kq.to(tl.float8e4nv, bitcast=True).to(tl.float32)
                 ks = tl.load(kv8s_ptr + k8s_base + rows, mask=km, other=0.0)
-                k = (kf * ks[:, None]).to(tl.bfloat16)
+                k = (kf * ks[:, None]).to(q.dtype)
             else:
                 k = tl.load(kv_ptr + k_base + rows[:, None] * HD + d[None, :], mask=km[:, None], other=0.0)
             sc = tl.dot(q, tl.trans(k)) * SCALE
@@ -253,7 +253,7 @@ def _attn_part_kernel(q_ptr, kv_ptr, k_base0, kind_stride, head_stride, kv8s_ptr
                 vq = tl.load(kv_ptr + v_base + rows[:, None] * HD + d[None, :], mask=km[:, None], other=0)
                 vf = vq.to(tl.float8e4nv, bitcast=True).to(tl.float32)
                 vs = tl.load(kv8s_ptr + v8s_base + rows, mask=km, other=0.0)
-                v = (vf * vs[:, None]).to(tl.bfloat16)
+                v = (vf * vs[:, None]).to(q.dtype)
             else:
                 v = tl.load(kv_ptr + v_base + rows[:, None] * HD + d[None, :], mask=km[:, None], other=0.0)
             acc = acc * alpha[:, None] + tl.dot(pr.to(v.dtype), v)

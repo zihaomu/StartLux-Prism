@@ -24,7 +24,7 @@ def main():
     p.add_argument("--gguf", required=True)
     p.add_argument("--model-dir", required=True)
     p.add_argument("--output", required=True)
-    p.add_argument("--precision", choices=("w4a8", "w4a16"), default="w4a8")
+    p.add_argument("--precision", choices=("int8", "w4a8", "w4a16"), default="w4a8")
     p.add_argument("--tokens", type=int, default=8)
     p.add_argument("--graphs", action="store_true")
     a = p.parse_args()
@@ -101,6 +101,7 @@ def main():
         peak_reserved=torch.cuda.max_memory_reserved(),
         free_total=torch.cuda.mem_get_info(),
     )
+    Path(a.output).parent.mkdir(parents=True, exist_ok=True)
     Path(a.output).write_text(json.dumps(result, indent=2) + "\n")
     print("PASS decode teacher forcing, exact batch isolation and seeded sampling", json.dumps(result), flush=True)
 

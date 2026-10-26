@@ -345,6 +345,8 @@ class Decoder:
         (self._layers_int8 if e.int8 else self._layers_w4 if e.w4 else self._layers_bf16)(B)
         KD.topk(b["logits"][:B], TOPK, b["vals"][:B], b["idx"][:B])
         KD.sample(b["vals"], b["idx"], t["seed"], t["step"], t["temp"], t["top_p"], t["top_k"], b["tok_out"], self.n, B)
+        if self.tp is not None:
+            self.tp.end()
 
     def _graph(self, B):
         g = self._graphs.get(B)

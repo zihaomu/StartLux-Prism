@@ -1,5 +1,9 @@
 # Experimental ROCm single-GPU backend
 
+This page records the Radeon `gfx1201` profile. For AMD Instinct MI355X (`gfx950`),
+including BF16/INT8, Instant models and multiple GPUs, use [the MI355X guide](mi355x.md).
+The restrictions and qualification results below apply to the Radeon profile.
+
 This is an experimental single-GPU backend for Radeon AI PRO R9700 (`gfx1201`, 32 GB).
 W4A8 remains the automatic Q4_K_M profile; compressed W4A16 is an explicit option.
 The initial checkpoint is `StartLux-Decision-v1.1-27B-AutoThink-Q4_K_M.gguf`

@@ -95,6 +95,7 @@ def main():
         peak_reserved=torch.cuda.max_memory_reserved(),
         free_total=torch.cuda.mem_get_info(),
     )
+    Path(a.output).parent.mkdir(parents=True, exist_ok=True)
     Path(a.output).write_text(json.dumps(result, indent=2) + "\n")
     print("PASS graph and cache qualification", json.dumps(result), flush=True)
 
